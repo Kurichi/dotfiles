@@ -1,5 +1,6 @@
 function cd
-  builtin cd $argv
-  pwd
-  ls
+	builtin cd $argv
+	pwd
+	ls
 end
+

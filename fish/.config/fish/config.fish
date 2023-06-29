@@ -1,11 +1,22 @@
 if status is-interactive
     # Commands to run in interactive sessions can go here
+
+    eval (/opt/homebrew/bin/brew shellenv)
 end
 
-set -x DENO_INSTALL /home/kurichi/.deno
-set -x PNPM_HOME /home/kurichi/.local/share/pnpm/
+fish_hybrid_key_bindings
+bind -M insert -m default jk force-repaint
+bind -M insert -m default jj force-repaint
 
-npx expose-wsl@latest
+set -gx PNPM_HOME "/Users/kurichi/Library/pnpm"
 
-set -x REACT_NATIVE_PACKAGER_HOSTNAME (ipconfig.exe | grep -a 'IPv4' |  cut -d ':' -f 2 | sed 's/ //g' | sed -n -e '/^192/p')
+# git aliases
+abbr -a gp 'git push origin HEAD'
+abbr -a gc 'git commit'
+abbr -a gs 'git switch'
+abbr -a gsm 'git switch main'
+abbr -a gsd 'git switch develop'
+abbr -a gsc 'git switch -c '
 
+# docker aliases
+abbr -a dcom 'docker compose'
