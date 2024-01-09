@@ -1,6 +1,5 @@
-require("base")
-require("autocmds")
-require("options")
-require("keymaps")
-require("colorscheme")
-require("plugins")
+require 'options'
+require 'keymaps'
+
+require 'lazy_nvim'
+
