@@ -1,108 +1,162 @@
-local fn = vim.fn
-
--- Automatically install packer
-local install_path = fn.stdpath("data") .. "/site/pack/packer/start/packer.nvim"
-if fn.empty(fn.glob(install_path)) > 0 then
-  PACKER_BOOTSTRAP = fn.system({
-    "git",
-    "clone",
-    "--depth",
-    "1",
-    "https://github.com/wbthomason/packer.nvim",
-    install_path,
-  })
-  print("Installing packer close and reopen Neovim...")
-  vim.cmd([[packadd packer.nvim]])
-end
-
--- Autocommand that reloads neovim whenever you save the plugins.lua file
-vim.cmd([[
-  augroup packer_user_config
-    autocmd!
-    autocmd BufWritePost plugins.lua source <afile> | PackerSync
-  augroup end
-]])
-
--- Use a protected call so we don't error out on first use
-local status_ok, packer = pcall(require, "packer")
-if not status_ok then
-  return
-end
-
--- Have packer use a popup window
-packer.init({
-  display = {
-    open_fn = function()
-      return require("packer.util").float({ border = "rounded" })
-    end,
+return {
+  -- VimDoc (Japanese Vim Help)
+  { 
+    'vim-jp/vimdoc-ja',
+    lazy = true,
+    keys = {
+      { "h", mode = "c", },
+    },
   },
-})
 
--- Install your plugins here
-return packer.startup(function(use)
-  -- My plugins here
+  -- Nvimtree (File Explorer)
+  {
+    'nvim-tree/nvim-tree.lua',
+    lazy = false,
+    dependencies = {
+        'nvim-tree/nvim-web-devicons',
+    },
+    config = function() require 'plugin/nvim-tree' end,
+  },
 
-  use({ "wbthomason/packer.nvim" })
-  use({ "nvim-lua/plenary.nvim" }) -- Common utilities
+  -- Lualine (Statusline)
+  {
+    'nvim-lualine/lualine.nvim',
+    dependencies = { 'nvim-web-devicons', opt = true },
+    event = { 'BufNewFile', 'BufRead' },
+    options = { theme = 'gruvbox' },
+    config = 'require("lualine").setup()'
+  },
 
-  -- Colorschemes
-  use({ "EdenEast/nightfox.nvim" }) -- Color scheme
-  use({ "folke/tokyonight.nvim" })
-
-  use({ "nvim-lualine/lualine.nvim" })    -- Statusline
-  use({ "windwp/nvim-autopairs" })        -- Autopairs, integrates with both cmp and treesitter
-  use({ "kyazdani42/nvim-web-devicons" }) -- File icons
-  use({ "akinsho/bufferline.nvim" })
-
-  -- cmp plugins
-  use({ "hrsh7th/nvim-cmp" })         -- The completion plugin
-  use({ "hrsh7th/cmp-buffer" })       -- buffer completions
-  use({ "hrsh7th/cmp-path" })         -- path completions
-  use({ "hrsh7th/cmp-cmdline" })      -- cmdline completions
-  use({ "saadparwaiz1/cmp_luasnip" }) -- snippet completions
-  use({ "hrsh7th/cmp-nvim-lsp" })
-  use({ "hrsh7th/cmp-nvim-lua" })
-  use({ "onsails/lspkind-nvim" })
-
-  -- snippets
-  use({ "L3MON4D3/LuaSnip" }) --snippet engine
+  -- Nvim TreeSitter
+  {
+    "nvim-treesitter/nvim-treesitter",
+    event = "VeryLazy",
+    dependencies = {
+      {
+        "nvim-treesitter/nvim-treesitter-textobjects",
+        init = function()
+          -- disable rtp plugin, as we only need its queries for mini.ai
+          -- In case other textobject modules are enabled, we will load them
+          -- once nvim-treesitter is loaded
+          require("lazy.core.loader").disable_rtp_plugin("nvim-treesitter-textobjects")
+          load_textobjects = true
+        end,
+      },
+    },
+    config = function()
+      require'nvim-treesitter.configs'.setup {
+        ensure_installed = "all", -- one of "all", "maintained" (parsers with maintainers), or a list of languages
+        highlight = {
+          enable = true,
+          --[[ disable = { "embedded_template" } ]]
+        },
+        indent = {
+          enable = true
+        },
+        context_commentstring = {
+          enable = true,
+          enable_autocmd = false,
+        },
+        matchup = {
+          enable = true
+        }
+      }
+    end,
+    cmd = { "TSUpdateSync" },
+    keys = {
+      { "<c-space>", desc = "Increment selection" },
+      { "<bs>", desc = "Decrement selection", mode = "x" },
+    }
+  },
 
   -- LSP
-  use({ "neovim/nvim-lspconfig" })           -- enable LSP
-  use({ "williamboman/nvim-lsp-installer" }) -- simple to use language server installer
-  use({ "jose-elias-alvarez/null-ls.nvim" }) -- for formatters and linters
-  use({ "glepnir/lspsaga.nvim" })            -- LSP UIs
+  {
+    'VonHeikemen/lsp-zero.nvim',
+    branch = 'v1.x',
+    dependencies = {
+      -- LSP Support
+      { 'neovim/nvim-lspconfig' },
 
-  -- Formatter
-  use({ "MunifTanjim/prettier.nvim" })
+      {
+        'williamboman/mason.nvim',
+        cmd = {
+          "Mason",
+          "MasonInstall",
+          "MasonUninstall",
+          "MasonUninstallAll",
+          "MasonLog",
+          "MasonUpdate",
+        },
+        build = ":MasonUpdate",
+      },
+
+      {
+        'williamboman/mason-lspconfig.nvim',
+        event = { "BufReadPre", "BufNewFile" },
+      },
+      -- Autocompletion
+      {
+        'hrsh7th/nvim-cmp',
+        event = "InsertEnter",
+      },         -- Required
+      {'hrsh7th/cmp-nvim-lsp'},     -- Required
+      {'hrsh7th/cmp-buffer'},       -- Optional
+      {'hrsh7th/cmp-path'},         -- Optional
+      {'saadparwaiz1/cmp_luasnip'}, -- Optional
+      {'hrsh7th/cmp-nvim-lua'},     -- Optional
+      -- Snippets
+      {'L3MON4D3/LuaSnip'},             -- Required
+      {'rafamadriz/friendly-snippets'}, -- Optional
+    },
+    config = function() require 'plugin/lsp' end,
+  },
+
+  -- Comment
+  {
+    'numToStr/Comment.nvim',
+    config = function()
+        require('Comment').setup()
+    end
+  },
+
+  -- Autopairs
+  {
+    'windwp/nvim-autopairs',
+    event = "InsertEnter",
+    opts = {}
+  },
+
+  {
+    'github/copilot.vim',
+    lazy = false,
+    config = function() require 'plugin/copilot' end,
+  },
+
+  {
+    'kevinhwang91/nvim-hlslens',
+    lazy = true,
+    keys = {
+      { '/', mode='n' },
+      { '*', mode='n' },
+      { '#', mode='n' },
+      { 'g*', mode='n' },
+      { 'g#', mode='n' },
+      { 'g/', mode='n' },
+    }
+  },
 
   -- Telescope
-  use({ "nvim-telescope/telescope.nvim" })
+  {
+    'nvim-telescope/telescope.nvim',
+    lazy = false,
+    config = function() require 'plugin/telescope' end,
+    dependencies = {
+      {'nvim-tree/nvim-web-devicons'}, 
+      {'nvim-lua/plenary.nvim'},
+    },
+    keys = {
+      { '<Leader>ff', mode='n' },
+    }
+  },
+}
 
-  -- Treesitter
-  use({ "nvim-treesitter/nvim-treesitter", { run = ":TSUpdate" } })
-  use({ "nvim-telescope/telescope-file-browser.nvim" })
-  use({ "mrjones2014/nvim-ts-rainbow" })
-
-  -- VSCode like にする
-  use "lukas-reineke/indent-blankline.nvim"
-
-  use({ "windwp/nvim-ts-autotag" })
-
-  use {
-    "folke/zen-mode.nvim",
-    config = function()
-      require("zen-mode").setup {
-        -- your configuration comes here
-        -- or leave it empty to use the default settings
-        -- refer to the configuration section below
-      }
-    end
-  }
-
-  -- Automatically set up your configuration after cloning packer.nvim
-  -- Put this at the end after all plugins
-  if PACKER_BOOTSTRAP then
-    require("packer").sync()
-  end
-end)
