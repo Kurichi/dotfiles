@@ -16,7 +16,7 @@
       cleanup = "none";  # Keep existing packages not in this list
     };
     casks = [
-      "visual-studio-code"
+      "raycast"
     ];
   };
 

@@ -1,9 +1,11 @@
-{ config, pkgs, llmPkgs, ... }:
+{ config, pkgs, llmPkgs, weztermPkg, ... }:
 
 {
   imports = [
     ./git.nix
     ./fish.nix
+    ./vscode.nix
+    ./wezterm.nix
   ];
 
   # Home Manager state version
@@ -37,6 +39,26 @@
 
     # AI tools
     llmPkgs.claude-code
+
+    # AWS
+    ssm-session-manager-plugin
+
+    # Tools
+    tailscale
+    valkey
+    xcode-install
+
+    # GUI Apps
+    discord
+    slack
+    orbstack
+    jetbrains.datagrip
+    zoom-us
+
+    # Fonts
+    nerd-fonts.hack
+    nerd-fonts.intone-mono
+    noto-fonts-cjk-sans
   ];
 
   # Neovim
