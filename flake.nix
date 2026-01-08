@@ -13,16 +13,22 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    llm-agents = {
+      url = "github:numtide/llm-agents.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager }:
+  outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, llm-agents }:
     let
       username = "kurichi";
       hostname = "Kurichi-MacBook-Pro";
       system = "aarch64-darwin";
+      llmPkgs = llm-agents.packages.${system};
     in
     {
-      darwinConfigurations.${hostname} = nix-darwin.lib.darwinSystem {
+      darwinConfigurations.macos = nix-darwin.lib.darwinSystem {
         inherit system;
         modules = [
           ./nix/darwin.nix
@@ -31,10 +37,11 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.backupFileExtension = "backup";
+            home-manager.extraSpecialArgs = { inherit llmPkgs; };
             home-manager.users.${username} = import ./nix/home.nix;
           }
         ];
-        specialArgs = { inherit inputs username hostname; };
+        specialArgs = { inherit inputs username hostname llmPkgs; };
       };
     };
 }
