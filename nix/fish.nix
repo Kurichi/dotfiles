@@ -15,6 +15,8 @@
       eval (/opt/homebrew/bin/brew shellenv)
       # VSCode
       fish_add_path --append "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+      # pnpm
+      fish_add_path --append $PNPM_HOME
 
       # Key bindings
       fish_hybrid_key_bindings

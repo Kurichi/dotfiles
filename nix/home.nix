@@ -1,4 +1,4 @@
-{ config, pkgs, llmPkgs, weztermPkg, ... }:
+{ config, pkgs, llmPkgs, weztermPkg, dollPkg, ... }:
 
 {
   imports = [
@@ -6,10 +6,20 @@
     ./fish.nix
     ./vscode.nix
     ./wezterm.nix
+    ./claude.nix
   ];
 
   # Home Manager state version
   home.stateVersion = "24.11";
+
+  # Environment variables
+  home.sessionVariables = {
+    # AI Tools
+    CODEX_HOME = "$HOME/.config/codex";
+    CLAUDE_CONFIG_DIR = "$HOME/.config/claude";
+    # pnpm
+    PNPM_HOME = "$HOME/.local/share/pnpm";
+  };
 
   # Let Home Manager manage itself
   programs.home-manager.enable = true;
@@ -25,6 +35,7 @@
     ghq
     jq
     tree
+    tmux
 
     # Development
     nodejs
@@ -47,6 +58,7 @@
     tailscale
     valkey
     xcode-install
+    opensc
 
     # GUI Apps
     discord
@@ -54,6 +66,8 @@
     orbstack
     jetbrains.datagrip
     zoom-us
+    raycast
+    dollPkg
 
     # Fonts
     nerd-fonts.hack
@@ -67,5 +81,26 @@
     defaultEditor = true;
     viAlias = true;
     vimAlias = true;
+  };
+
+  # Startup apps (launchd)
+  launchd.enable = true;
+  launchd.agents = {
+    raycast = {
+      enable = true;
+      config = {
+        ProgramArguments = [ "${pkgs.raycast}/Applications/Raycast.app/Contents/MacOS/Raycast" ];
+        RunAtLoad = true;
+        KeepAlive = false;
+      };
+    };
+    doll = {
+      enable = true;
+      config = {
+        ProgramArguments = [ "${dollPkg}/Applications/Doll.app/Contents/MacOS/Doll" ];
+        RunAtLoad = true;
+        KeepAlive = false;
+      };
+    };
   };
 }

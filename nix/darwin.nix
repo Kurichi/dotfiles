@@ -16,8 +16,15 @@
       cleanup = "none";  # Keep existing packages not in this list
     };
     casks = [
-      "raycast"
+      "1password"
+      "adobe-acrobat-reader"
+      "google-drive"
+      "postman-agent"
+      "steam"
     ];
+    masApps = {
+      LINE = 539883307;
+    };
   };
 
   # Primary user (required for system.defaults options)
@@ -33,6 +40,7 @@
       };
       finder = {
         AppleShowAllExtensions = true;
+        AppleShowAllFiles = true;
         ShowPathbar = true;
         FXEnableExtensionChangeWarning = false;
       };

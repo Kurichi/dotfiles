@@ -42,6 +42,9 @@ _: {
       ".direnv/"
       ".env"
       "node_modules/"
+      ".idea"
+      ".vscode"
+      ".claude/settings.local.json"
     ];
   };
 }
