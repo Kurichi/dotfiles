@@ -4,6 +4,48 @@ local act = wezterm.action
 -- コピーモード終了アクション
 local close_copy_mode = act.Multiple({ "ScrollToBottom", { CopyMode = "Close" } })
 
+-- ペインを均等化する
+local function equalize_panes(window, tab)
+  local panes = tab:panes()
+  local num_panes = #panes
+  if num_panes <= 1 then
+    return
+  end
+
+  local tab_cols = tab:get_size().cols
+  local target_cols = math.floor(tab_cols / num_panes)
+
+  -- 左から順にリサイズ（最後のペイン以外）
+  for i = 1, num_panes - 1 do
+    local p = panes[i]
+    local cols = p:get_dimensions().cols
+    local diff = target_cols - cols
+
+    if math.abs(diff) > 1 then
+      p:activate()
+      local dir = diff > 0 and "Right" or "Left"
+      window:perform_action(act.AdjustPaneSize({ dir, math.abs(diff) }), p)
+    end
+  end
+end
+
+-- 均等分割: 分割後にペインを均等化する
+local function smart_split(direction)
+  return wezterm.action_callback(function(window, pane)
+    local tab = pane:tab()
+
+    -- 分割
+    pane:split({ direction = direction })
+
+    -- 均等化
+    equalize_panes(window, tab)
+
+    -- 新しいペイン（右端）をアクティブに
+    local panes = tab:panes()
+    panes[#panes]:activate()
+  end)
+end
+
 -- ステータスバーにアクティブなキーテーブルを表示
 wezterm.on("update-right-status", function(window, _)
   local name = window:active_key_table()
@@ -22,7 +64,7 @@ end
 -- メインキーバインディング
 local keys = {
   -- ペイン
-  { key = "d", mods = "SUPER", action = act.SplitPane({ direction = "Right" }) },
+  { key = "d", mods = "SUPER", action = smart_split("Right") },
   { key = "[", mods = "SUPER", action = act.ActivatePaneDirection("Left") },
   { key = "]", mods = "SUPER", action = act.ActivatePaneDirection("Right") },
   { key = "j", mods = "SUPER", action = act.ActivatePaneDirection("Left") },
