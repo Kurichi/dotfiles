@@ -31,6 +31,12 @@ config.colors = {
     inactive_tab_edge = "none",
   },
 }
+
+-- 非アクティブペインを暗くしてアクティブペインを目立たせる
+config.inactive_pane_hsb = {
+  saturation = 0.8, -- 彩度を下げる
+  brightness = 0.6, -- 明るさを下げる
+}
 wezterm.on("format-tab-title", function(tab, tabs, panes, config, hover, max_width)
   local background = "#5c6d74"
   local foreground = "#FFFFFF"
