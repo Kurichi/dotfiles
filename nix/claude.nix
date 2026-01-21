@@ -10,10 +10,6 @@
     source = ../config/claude/skills;
   };
 
-  home.file.".config/claude/hooks" = {
-    source = ../config/claude/hooks;
-  };
-
   home.file.".config/claude/commands" = {
     source = ../config/claude/commands;
   };

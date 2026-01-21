@@ -1,11 +1,10 @@
 #!/bin/sh
 
 # fish
-cp -rf ~/.config/fish/* ./fish/.config/fish/
+cp -rf ~/.config/fish/* ./config/fish/
 
-# nvim
-cp -rf ~/.config/nvim/* ./nvim/.config/nvim/
-rm -rf ./nvim/.config/nvim/dein/repos/*
+# nvim (lazy-lock.json などを同期)
+cp -rf ~/.config/nvim/* ./config/nvim/
 
 # vim
 cp -rf ~/.vimrc ./vim/

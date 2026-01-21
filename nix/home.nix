@@ -7,6 +7,7 @@
     ./vscode.nix
     ./wezterm.nix
     ./claude.nix
+    ./neovim.nix
   ];
 
   # Home Manager state version
@@ -84,14 +85,6 @@
     [worktree]
     basedir = '~/repos'
   '';
-
-  # Neovim
-  programs.neovim = {
-    enable = true;
-    defaultEditor = true;
-    viAlias = true;
-    vimAlias = true;
-  };
 
   # Startup apps (launchd)
   launchd.enable = true;

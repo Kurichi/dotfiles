@@ -11,9 +11,19 @@
 - gopls MCP Server を使用して LSP を参照してください。
 
 ## 使用するコマンド・ツール
-### Linux Command 代替
-- grep ではなく ripgrep を使用してください．
-- find ではなく fd を使用してください．
+
+### コマンド代替
+
+| 一般的なコマンド | 使用するコマンド |
+|------------------|------------------|
+| `grep`           | `rg` (ripgrep)   |
+| `find`           | `fd`             |
+| `ls`             | `eza`            |
+| `npm`            | `pnpm`           |
+| `npx`            | `pnpx`           |
+| `python3`        | `uv run python3` |
+| `uv run python something.py` | `uv run something.py` |
+| `uv pip install xxx`         | `uv add xxx`          |
 
 ### Git コマンド
 - ブランチの作成は `git switch` コマンドを使用してください．
