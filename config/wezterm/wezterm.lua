@@ -30,12 +30,14 @@ config.colors = {
   tab_bar = {
     inactive_tab_edge = "none",
   },
+  split = "#BABBF1", -- ペイン境界線を目立たせる
 }
 
 -- 非アクティブペインを暗くしてアクティブペインを目立たせる
 config.inactive_pane_hsb = {
-  saturation = 0.8, -- 彩度を下げる
-  brightness = 0.6, -- 明るさを下げる
+  hue = 0.9,        -- 色相をずらしてグレー調に
+  saturation = 0.5, -- 彩度を大幅に下げる
+  brightness = 0.5, -- 暗くする
 }
 wezterm.on("format-tab-title", function(tab, tabs, panes, config, hover, max_width)
   local background = "#5c6d74"
