@@ -36,11 +36,13 @@ _: {
         };
       };
       user.signingkey = "~/.ssh/github.pub";
+      ghq.root = "~/repos";
     };
     ignores = [
       ".DS_Store"
       ".direnv/"
       ".env"
+      ".kurichi/"
       "node_modules/"
       ".idea"
       ".vscode"
