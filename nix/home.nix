@@ -1,4 +1,4 @@
-{ config, pkgs, llmPkgs, weztermPkg, dollPkg, ... }:
+{ config, pkgs, llmPkgs, weztermPkg, dollPkg, gwqPkg, ... }:
 
 {
   imports = [
@@ -47,6 +47,7 @@
     # Git tools
     gh
     lazygit
+    gwqPkg
 
     # AI tools
     llmPkgs.claude-code
@@ -74,6 +75,15 @@
     nerd-fonts.intone-mono
     noto-fonts-cjk-sans
   ];
+
+  # gwq config
+  xdg.configFile."gwq/config.toml".text = ''
+    [naming]
+    template = '{{.Host}}/{{.Owner}}/{{.Repository}}={{.Branch}}'
+
+    [worktree]
+    basedir = '~/repos'
+  '';
 
   # Neovim
   programs.neovim = {

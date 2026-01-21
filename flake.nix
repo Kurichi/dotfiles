@@ -34,6 +34,7 @@
       llmPkgs = llm-agents.packages.${system};
       weztermPkg = wezterm.packages.${system}.default;
       dollPkg = pkgs.callPackage ./nix/packages/doll.nix { };
+      gwqPkg = pkgs.callPackage ./nix/packages/gwq.nix { };
     in
     {
       darwinConfigurations.macos = nix-darwin.lib.darwinSystem {
@@ -45,7 +46,7 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = { inherit llmPkgs weztermPkg dollPkg; };
+            home-manager.extraSpecialArgs = { inherit llmPkgs weztermPkg dollPkg gwqPkg; };
             home-manager.users.${username} = import ./nix/home.nix;
           }
         ];

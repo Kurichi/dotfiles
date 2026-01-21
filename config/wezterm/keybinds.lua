@@ -12,10 +12,44 @@ end)
 
 return {
   keys = {
+    -- 水平分割
     {
       key = "d",
       mods = "SUPER",
-      action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }),
+      action = act.SplitPane({ direction = "Right" }),
+    },
+    -- ペイン均等化 (SUPER+SHIFT+D)
+    {
+      key = "D",
+      mods = "SUPER|SHIFT",
+      action = wezterm.action_callback(function(window, pane)
+        local tab = pane:tab()
+        local panes = tab:panes_with_info()
+        if #panes < 2 then
+          return
+        end
+
+        -- 全体幅を計算
+        local total_width = 0
+        for _, p in ipairs(panes) do
+          total_width = total_width + p.width
+        end
+        total_width = total_width + (#panes - 1) -- セパレータ分
+
+        local target = math.floor(total_width / #panes)
+
+        -- 左から順にサイズ調整
+        for i = 1, #panes - 1 do
+          local p = panes[i]
+          local diff = p.width - target
+          if diff ~= 0 then
+            window:perform_action(
+              act.AdjustPaneSize({ diff > 0 and "Left" or "Right", math.abs(diff) }),
+              p.pane
+            )
+          end
+        end
+      end),
     },
     {
       key = "[",
@@ -47,19 +81,14 @@ return {
     { key = "Enter", mods = "ALT",            action = act.ToggleFullScreen },
     { key = "!",     mods = "CTRL",           action = act.ActivateTab(0) },
     { key = "!",     mods = "SHIFT|CTRL",     action = act.ActivateTab(0) },
-    { key = '"',     mods = "ALT|CTRL",       action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
-    { key = '"',     mods = "SHIFT|ALT|CTRL", action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
     { key = "#",     mods = "CTRL",           action = act.ActivateTab(2) },
     { key = "#",     mods = "SHIFT|CTRL",     action = act.ActivateTab(2) },
     { key = "$",     mods = "CTRL",           action = act.ActivateTab(3) },
     { key = "$",     mods = "SHIFT|CTRL",     action = act.ActivateTab(3) },
     { key = "%",     mods = "CTRL",           action = act.ActivateTab(4) },
     { key = "%",     mods = "SHIFT|CTRL",     action = act.ActivateTab(4) },
-    { key = "%",     mods = "ALT|CTRL",       action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
-    { key = "%",     mods = "SHIFT|ALT|CTRL", action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
     { key = "&",     mods = "CTRL",           action = act.ActivateTab(6) },
     { key = "&",     mods = "SHIFT|CTRL",     action = act.ActivateTab(6) },
-    { key = "'",     mods = "SHIFT|ALT|CTRL", action = act.SplitVertical({ domain = "CurrentPaneDomain" }) },
     { key = "(",     mods = "CTRL",           action = act.ActivateTab(-1) },
     { key = "(",     mods = "SHIFT|CTRL",     action = act.ActivateTab(-1) },
     { key = ")",     mods = "CTRL",           action = act.ResetFontSize },
@@ -81,7 +110,6 @@ return {
     { key = "4",     mods = "SHIFT|CTRL",     action = act.ActivateTab(3) },
     { key = "4",     mods = "SUPER",          action = act.ActivateTab(3) },
     { key = "5",     mods = "SHIFT|CTRL",     action = act.ActivateTab(4) },
-    { key = "5",     mods = "SHIFT|ALT|CTRL", action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
     { key = "5",     mods = "SUPER",          action = act.ActivateTab(4) },
     { key = "6",     mods = "SHIFT|CTRL",     action = act.ActivateTab(5) },
     { key = "6",     mods = "SUPER",          action = act.ActivateTab(5) },
@@ -146,7 +174,6 @@ return {
     { key = "_", mods = "SHIFT|CTRL",  action = act.DecreaseFontSize },
     { key = "c", mods = "SHIFT|CTRL",  action = act.CopyTo("Clipboard") },
     { key = "c", mods = "SUPER",       action = act.CopyTo("Clipboard") },
-    { key = "d", mods = "SUPER",       action = act.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
     { key = "f", mods = "SHIFT|CTRL",  action = act.Search("CurrentSelectionOrEmptyString") },
     { key = "f", mods = "SUPER",       action = act.Search("CurrentSelectionOrEmptyString") },
     { key = "h", mods = "SHIFT|CTRL",  action = act.HideApplication },

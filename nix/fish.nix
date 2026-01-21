@@ -1,6 +1,13 @@
 { pkgs, ... }:
 
 {
+  # Fish functions from external files
+  xdg.configFile = {
+    "fish/functions/dev.fish".source = ../config/fish/functions/dev.fish;
+    "fish/functions/ghq-fzf.fish".source = ../config/fish/functions/ghq-fzf.fish;
+    "fish/functions/gwq-fzf.fish".source = ../config/fish/functions/gwq-fzf.fish;
+  };
+
   programs.fish = {
     enable = true;
     interactiveShellInit = ''
