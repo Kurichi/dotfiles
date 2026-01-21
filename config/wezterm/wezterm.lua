@@ -21,12 +21,10 @@ config.window_frame = {
   inactive_titlebar_bg = "none",
   active_titlebar_bg = "none",
 }
-config.window_background_gradient = {
-  colors = { "#2A2C3C" },
-}
 config.show_new_tab_button_in_tab_bar = false
 config.show_close_tab_button_in_tabs = false
 config.colors = {
+  background = "#2A2C3C", -- ペインの背景色（inactive_pane_hsb が効くようにする）
   tab_bar = {
     inactive_tab_edge = "none",
   },
