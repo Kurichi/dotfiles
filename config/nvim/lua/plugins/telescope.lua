@@ -1,15 +1,16 @@
 return {
-  { "nvim-telescope/telescope-ui-select.nvim",   lazy = false },
+  { "nvim-telescope/telescope-ui-select.nvim", lazy = true },
   {
     "nvim-telescope/telescope-fzf-native.nvim",
+    lazy = true,
     build = "make",
   },
-  { "nvim-tree/nvim-web-devicons" },
-  { "nvim-lua/plenary.nvim" },
-  { "nvim-telescope/telescope-file-browser.nvim" },
+  { "nvim-tree/nvim-web-devicons", lazy = true },
+  { "nvim-lua/plenary.nvim", lazy = true },
+  { "nvim-telescope/telescope-file-browser.nvim", lazy = true },
   {
     "nvim-telescope/telescope.nvim",
-    event = { "BufWinEnter" },
+    cmd = "Telescope",
     keys = {
       { "<Leader>ff", mode = "n" },
       { "<Leader>fb", mode = "n" },

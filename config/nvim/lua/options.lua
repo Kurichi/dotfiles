@@ -1,3 +1,7 @@
+-- シンタックスハイライトを有効化
+vim.cmd("syntax enable")
+vim.cmd("filetype plugin indent on")
+
 local options = {
   -- encoding
   encoding = "utf-8",
@@ -85,4 +89,11 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   callback = function()
     vim.highlight.on_yank({ higroup = "YankHighlight", timeout = 200 })
   end,
+})
+
+-- CLAUDE.md などをmarkdownとして認識
+vim.filetype.add({
+  filename = {
+    ["CLAUDE.md"] = "markdown",
+  },
 })

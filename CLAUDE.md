@@ -10,7 +10,7 @@ macOS (Apple Silicon) 用のdotfilesリポジトリ。nix-darwinとhome-manager�
 
 ```bash
 # システム設定を適用（nix-darwin + home-manager）
-darwin-rebuild switch --flake .#macos
+sudo darwin-rebuild switch --flake .#macos
 
 # 設定ファイルを ~/.config からリポジトリに同期
 ./sync.sh
