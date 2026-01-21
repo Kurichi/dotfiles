@@ -12,19 +12,26 @@ local function equalize_panes(window, tab)
     return
   end
 
+  -- ペインを左から右の順にソート
+  table.sort(panes, function(a, b)
+    return a:get_dimensions().pixel_left < b:get_dimensions().pixel_left
+  end)
+
   local tab_cols = tab:get_size().cols
   local target_cols = math.floor(tab_cols / num_panes)
 
-  -- 左から順にリサイズ（最後のペイン以外）
-  for i = 1, num_panes - 1 do
-    local p = panes[i]
-    local cols = p:get_dimensions().cols
-    local diff = target_cols - cols
+  -- 複数回イテレーションして収束させる
+  for _ = 1, 3 do
+    for i = 1, num_panes - 1 do
+      local p = panes[i]
+      local cols = p:get_dimensions().cols
+      local diff = target_cols - cols
 
-    if math.abs(diff) > 1 then
-      p:activate()
-      local dir = diff > 0 and "Right" or "Left"
-      window:perform_action(act.AdjustPaneSize({ dir, math.abs(diff) }), p)
+      if math.abs(diff) > 1 then
+        p:activate()
+        local dir = diff > 0 and "Right" or "Left"
+        window:perform_action(act.AdjustPaneSize({ dir, math.abs(diff) }), p)
+      end
     end
   end
 end
