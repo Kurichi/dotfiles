@@ -6,7 +6,7 @@
     ./fish.nix
     ./vscode.nix
     ./wezterm.nix
-    ./claude.nix
+    ./llm-agents.nix
     ./neovim.nix
   ];
 
@@ -18,6 +18,7 @@
     # AI Tools
     CODEX_HOME = "$HOME/.config/codex";
     CLAUDE_CONFIG_DIR = "$HOME/.config/claude";
+    GEMINI_CLI_HOME = "$HOME/.config";  # ~/.config/.gemini/ に設定保存
     # pnpm
     PNPM_HOME = "$HOME/.local/share/pnpm";
   };
@@ -54,6 +55,10 @@
 
     # AI tools
     llmPkgs.claude-code
+    llmPkgs.codex
+    llmPkgs.gemini-cli
+    llmPkgs.copilot-cli
+    moreutils  # sponge コマンド（設定ファイルの in-place 更新用）
 
     # AWS
     ssm-session-manager-plugin

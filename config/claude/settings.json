@@ -1,0 +1,62 @@
+{
+  "respectGitignore": false,
+  "cleanupPeriodDays": 90,
+  "env": {
+    "EDITOR": "nvim"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(fd:*)",
+      "Bash(rg:*)",
+      "Bash(eza:*)",
+      "mcp__gopls__*",
+      "mcp__deepwiki__*",
+      "WebSearch"
+    ],
+    "deny": [
+      "Bash(git reset --hard:*)"
+    ],
+    "defaultMode": "plan"
+  },
+  "model": "opus",
+  "hooks": {
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "afplay /System/Library/Sounds/Glass.aiff"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "afplay /System/Library/Sounds/Funk.aiff"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bunx -y ccstatusline@latest",
+    "padding": 0
+  },
+  "outputStyle": "Explanatory",
+  "language": "Japanese",
+  "spinnerVerbs": {
+    "mode": "replace",
+    "verbs": [
+      "うーむ",
+      "う〜〜〜む",
+      "脳みそフル回転中",
+      "考え中",
+      "うるとらしんきんぐ",
+      "頭がオーバーヒート"
+    ]
+  }
+}
