@@ -28,7 +28,7 @@
       "raycast"
       "slack"
       "steam"
-      "wezterm"
+      "wezterm@nightly"
       "zoom"
     ];
     masApps = {
