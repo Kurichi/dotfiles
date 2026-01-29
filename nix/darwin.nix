@@ -19,9 +19,17 @@
     casks = [
       "1password"
       "adobe-acrobat-reader"
+      "datagrip"
+      "discord"
+      "doll"
       "google-drive"
+      "orbstack"
       "postman-agent"
+      "raycast"
+      "slack"
       "steam"
+      "wezterm"
+      "zoom"
     ];
     masApps = {
       LINE = 539883307;

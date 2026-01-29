@@ -1,4 +1,4 @@
-{ config, pkgs, llmPkgs, weztermPkg, dollPkg, gwqPkg, ... }:
+{ config, pkgs, llmPkgs, weztermPkg, gwqPkg, ... }:
 
 {
   imports = [
@@ -64,14 +64,7 @@
     xcode-install
     opensc
 
-    # GUI Apps
-    discord
-    slack
-    orbstack
-    jetbrains.datagrip
-    zoom-us
-    raycast
-    dollPkg
+    # GUI Apps: Homebrew casksで管理（darwin.nix参照）
 
     # Fonts
     nerd-fonts.hack
@@ -94,7 +87,7 @@
     raycast = {
       enable = true;
       config = {
-        ProgramArguments = [ "${pkgs.raycast}/Applications/Raycast.app/Contents/MacOS/Raycast" ];
+        ProgramArguments = [ "/Applications/Raycast.app/Contents/MacOS/Raycast" ];
         RunAtLoad = true;
         KeepAlive = false;
       };
@@ -102,7 +95,7 @@
     doll = {
       enable = true;
       config = {
-        ProgramArguments = [ "${dollPkg}/Applications/Doll.app/Contents/MacOS/Doll" ];
+        ProgramArguments = [ "/Applications/Doll.app/Contents/MacOS/Doll" ];
         RunAtLoad = true;
         KeepAlive = false;
       };

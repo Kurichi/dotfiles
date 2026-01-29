@@ -4,9 +4,6 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
-    # 特定パッケージ用の最新 nixpkgs（メインと独立して更新可能）
-    nixpkgs-latest.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-
     nix-darwin = {
       url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -21,22 +18,15 @@
       url = "github:numtide/llm-agents.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    wezterm = {
-      url = "github:wez/wezterm?dir=nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
-  outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, llm-agents, wezterm }:
+  outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, llm-agents }:
     let
       username = "kurichi";
       hostname = "Kurichi-MacBook-Pro";
       system = "aarch64-darwin";
       pkgs = nixpkgs.legacyPackages.${system};
       llmPkgs = llm-agents.packages.${system};
-      weztermPkg = wezterm.packages.${system}.default;
-      dollPkg = pkgs.callPackage ./nix/packages/doll.nix { };
       gwqPkg = pkgs.callPackage ./nix/packages/gwq.nix { };
     in
     {
@@ -49,7 +39,7 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = { inherit llmPkgs weztermPkg dollPkg gwqPkg; };
+            home-manager.extraSpecialArgs = { inherit llmPkgs gwqPkg; };
             home-manager.users.${username} = import ./nix/home.nix;
           }
         ];
