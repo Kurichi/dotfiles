@@ -15,6 +15,7 @@
       autoUpdate = true;
       cleanup = "none";  # Keep existing packages not in this list
     };
+    caskArgs.appdir = "/Applications";
     casks = [
       "1password"
       "adobe-acrobat-reader"

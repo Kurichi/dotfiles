@@ -44,11 +44,13 @@
     bun
     uv
     go
+    rustup
 
     # Git tools
     gh
     lazygit
     gwqPkg
+    # pkgs."git-wt"  # TODO: nixpkgs更新後に戻す
 
     # AI tools
     llmPkgs.claude-code
