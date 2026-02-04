@@ -1,11 +1,21 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Codex の返答が完了したか確認
+# Codex の返答をチェック（tmux / WezTerm 両対応）
 # Usage: check_codex_status.sh <output_dir>
+#
+# ステータス:
+#   waiting    - 出力に変化なし
+#   new_output - 出力に変化あり（2行目以降に内容）
+#   pane_closed - ペインが閉じられた
+
+# ヘルパーライブラリを読み込み
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/pane_utils.sh"
 
 OUTPUT_DIR="$1"
 CODEX_PANE_ID_FILE="$OUTPUT_DIR/codex_pane_id"
+LAST_HASH_FILE="$OUTPUT_DIR/last_hash"
 LAST_OUTPUT_FILE="$OUTPUT_DIR/last_output"
 
 # Codex ペイン ID を取得
@@ -17,31 +27,39 @@ fi
 CODEX_PANE_ID=$(cat "$CODEX_PANE_ID_FILE")
 
 # ペインが存在するか確認
-if ! tmux list-panes -a -F '#{pane_id}' | grep -q "^$CODEX_PANE_ID$"; then
+if ! pane_exists "$CODEX_PANE_ID"; then
     echo "pane_closed"
     exit 0
 fi
 
 # 現在のペイン内容をキャプチャ
-CURRENT_OUTPUT=$(tmux capture-pane -t "$CODEX_PANE_ID" -p -S -100)
+CURRENT_OUTPUT=$(pane_get_text "$CODEX_PANE_ID")
 
-# 初回実行時は最終出力を保存して終了
-if [ ! -f "$LAST_OUTPUT_FILE" ]; then
+# ハッシュを計算（高速な比較のため）
+# macOS と Linux の両方に対応
+if command -v md5sum &>/dev/null; then
+    CURRENT_HASH=$(echo "$CURRENT_OUTPUT" | md5sum | cut -d' ' -f1)
+else
+    CURRENT_HASH=$(echo "$CURRENT_OUTPUT" | md5 -q)
+fi
+
+# 初回実行時
+if [ ! -f "$LAST_HASH_FILE" ]; then
+    echo "$CURRENT_HASH" > "$LAST_HASH_FILE"
     echo "$CURRENT_OUTPUT" > "$LAST_OUTPUT_FILE"
     echo "waiting"
     exit 0
 fi
 
-LAST_OUTPUT=$(cat "$LAST_OUTPUT_FILE")
+LAST_HASH=$(cat "$LAST_HASH_FILE")
 
-# 出力に変化があるか確認
-if [ "$CURRENT_OUTPUT" != "$LAST_OUTPUT" ]; then
-    # 新しい内容を保存
+if [ "$CURRENT_HASH" != "$LAST_HASH" ]; then
+    # 出力に変化あり
+    echo "$CURRENT_HASH" > "$LAST_HASH_FILE"
     echo "$CURRENT_OUTPUT" > "$LAST_OUTPUT_FILE"
-
-    # 新しい内容を返す
     echo "new_output"
     echo "$CURRENT_OUTPUT"
 else
+    # 出力に変化なし
     echo "waiting"
 fi

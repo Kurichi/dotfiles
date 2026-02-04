@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Codex レビューセッションを終了
+# Codex レビューセッションを終了（tmux / WezTerm 両対応）
 # Usage: close_codex_session.sh <output_dir>
+
+# ヘルパーライブラリを読み込み
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/pane_utils.sh"
 
 OUTPUT_DIR="$1"
 
@@ -14,13 +18,14 @@ if [ -z "$CODEX_PANE_ID" ]; then
 fi
 
 # ペインが存在するか確認
-if tmux list-panes -a -F '#{pane_id}' | grep -q "^$CODEX_PANE_ID$"; then
+if pane_exists "$CODEX_PANE_ID"; then
     # Codex プロセスを終了
-    tmux send-keys -t "$CODEX_PANE_ID" C-c C-m
+    pane_send_interrupt "$CODEX_PANE_ID"
+    pane_send_enter "$CODEX_PANE_ID"
     sleep 1
 
     # ペインを閉じる
-    tmux kill-pane -t "$CODEX_PANE_ID"
+    pane_kill "$CODEX_PANE_ID"
     echo "Codex pane $CODEX_PANE_ID closed"
 else
     echo "Codex pane $CODEX_PANE_ID not found (may already be closed)"
