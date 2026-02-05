@@ -1,4 +1,7 @@
 {
+  "trustedDirectories": [
+    "/Users/kurichi/repos"
+  ],
   "respectGitignore": false,
   "cleanupPeriodDays": 90,
   "env": {

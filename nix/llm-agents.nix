@@ -21,6 +21,9 @@ let
     .permissions.allow = ([$existing.permissions.allow // [], $nix.permissions.allow // []] | merge_arrays) |
     .permissions.deny = ([$existing.permissions.deny // [], $nix.permissions.deny // []] | merge_arrays) |
 
+    # trustedDirectories は配列マージ（既存 + Nix）
+    .trustedDirectories = ([$existing.trustedDirectories // [], $nix.trustedDirectories // []] | merge_arrays) |
+
     # enabledPlugins は既存を保持（TODO: 将来的に Nix 管理）
     .enabledPlugins = ($existing.enabledPlugins // {})
   '';
