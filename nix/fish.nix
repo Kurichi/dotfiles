@@ -46,6 +46,8 @@
       k8s = "kubectl";
       # nix
       rebuild = "darwin-rebuild switch --flake ~/repos/dotfiles#macos";
+      # claude
+      ccp = "claude --allow-dangerously-skip-permissions";
     };
     functions = {
       fish_prompt = ''

@@ -66,3 +66,21 @@ config/
 
 - `config/` 配下の設定は `~/.config/` にシンボリックリンクされる
 - `sync.sh`は `~/.config/` からこのリポジトリへのコピー（逆方向の同期用）
+
+## タスク実行時のワークフロー
+
+タスクを遂行する際は `gwq` を使用して git worktree を作成し、独立した作業環境で実施すること。
+
+### 手順
+
+1. **worktree 作成**: `gwq get <repository>` または `gwq add` で新しい worktree を作成
+2. **ディレクトリ移動**: 作成した worktree に `cd` で移動
+3. **作業実施**: その worktree 内でタスクを遂行
+4. **後処理**: PR がマージされたら `gwq remove` で worktree を削除
+
+### ブランチ命名規則
+
+- 新機能: `feature/説明` (例: `feature/add-auth`)
+- バグ修正: `fix/説明` (例: `fix/login-bug`)
+- リファクタ: `refactor/説明`
+- ドキュメント: `docs/説明`

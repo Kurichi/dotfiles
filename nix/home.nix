@@ -63,6 +63,9 @@
     # AWS
     ssm-session-manager-plugin
 
+    # Infrastructure
+    terraform
+
     # Tools
     tailscale
     valkey

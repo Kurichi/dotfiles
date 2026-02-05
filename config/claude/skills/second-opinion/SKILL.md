@@ -41,24 +41,32 @@ Use this skill proactively in these scenarios:
 
 ## Implementation
 
+**CRITICAL: You MUST use the provided scripts. Do NOT generate your own tmux/codex commands.**
+
 ### Starting a Review
 
 ```bash
-# Create review session with tmux split
+# REQUIRED: Use this exact pattern - do not modify or generate alternative commands
 OUTPUT_DIR="/tmp/codex-review-$(date +%s)"
-./scripts/start_codex_review.sh "$REVIEW_PROMPT" "$OUTPUT_DIR"
+SKILL_DIR="$HOME/.config/claude/skills/second-opinion"
+"$SKILL_DIR/scripts/start_codex_review.sh" "$REVIEW_PROMPT" "$OUTPUT_DIR"
 ```
 
-The script creates:
+The script handles:
 - Horizontal tmux split (left: Claude Code, right: Codex)
+- Working directory preservation (Codex runs in the same repo as Claude Code)
+- TTY/terminal requirements
 - Output directory with session metadata
 - Log file for Codex responses
+
+**DO NOT** use `script`, `expect`, or other TTY workarounds - the script handles this.
 
 ### Monitoring Progress
 
 ```bash
 # Poll for new output (call every 3-5 seconds)
-STATUS=$(./scripts/check_codex_status.sh "$OUTPUT_DIR")
+SKILL_DIR="$HOME/.config/claude/skills/second-opinion"
+STATUS=$("$SKILL_DIR/scripts/check_codex_status.sh" "$OUTPUT_DIR")
 
 if echo "$STATUS" | head -1 | grep -q "new_output"; then
     # New response available
@@ -71,14 +79,16 @@ fi
 
 ```bash
 # Send response to Codex
-./scripts/send_to_codex.sh "$OUTPUT_DIR" "Updated the plan to address your concerns: ..."
+SKILL_DIR="$HOME/.config/claude/skills/second-opinion"
+"$SKILL_DIR/scripts/send_to_codex.sh" "$OUTPUT_DIR" "Updated the plan to address your concerns: ..."
 ```
 
 ### Ending the Session
 
 ```bash
 # Close Codex pane when done
-./scripts/close_codex_session.sh "$OUTPUT_DIR"
+SKILL_DIR="$HOME/.config/claude/skills/second-opinion"
+"$SKILL_DIR/scripts/close_codex_session.sh" "$OUTPUT_DIR"
 ```
 
 ## Review Prompts
