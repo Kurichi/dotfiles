@@ -61,6 +61,7 @@
     moreutils  # sponge コマンド（設定ファイルの in-place 更新用）
 
     # AWS
+    awscli2
     ssm-session-manager-plugin
 
     # Infrastructure
