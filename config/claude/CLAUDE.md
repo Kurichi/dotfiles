@@ -28,6 +28,15 @@
 ### Git コマンド
 - ブランチの作成は `git switch` コマンドを使用してください．
 
+### GitHub API
+- `gh api` でデータを取得する際は、必ず `--jq` フラグで必要なフィールドのみ抽出すること（トークン節約のため）。
+- `diff_hunk` のような長大なフィールドは末尾数行のみ切り出すこと。
+- 例：PR レビューコメント取得時:
+  ```bash
+  gh api repos/{owner}/{repo}/pulls/{pr_number}/comments --paginate \
+    --jq '.[] | {id, body, user: .user.login, path, line: (.line // .original_line), diff_hunk: ((.diff_hunk // "") | split("\n") | .[-5:] | join("\n")), in_reply_to_id, created_at}'
+  ```
+
 ## プルリクエスト
 - `./.github/PULL_REQUEST_TEMPLATE.md` が存在する場合，それを元にPRを作成してください．
 

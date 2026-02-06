@@ -13,7 +13,8 @@ GitHub PRのレビューコメントを分析し、対応が必要かどうか�
 
 ```bash
 # PR番号指定の場合
-gh api repos/{owner}/{repo}/pulls/{pr_number}/comments
+gh api repos/{owner}/{repo}/pulls/{pr_number}/comments --paginate \
+  --jq '.[] | {id, body, user: .user.login, path, line: (.line // .original_line), diff_hunk: ((.diff_hunk // "") | split("\n") | .[-5:] | join("\n")), in_reply_to_id, created_at}'
 
 # 現在のブランチから自動検出
 gh pr view --json number -q '.number'
