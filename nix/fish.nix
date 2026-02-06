@@ -47,7 +47,7 @@
       # nix
       rebuild = "darwin-rebuild switch --flake ~/repos/dotfiles#macos";
       # claude
-      ccp = "claude --allow-dangerously-skip-permissions";
+      claude = "claude --allow-dangerously-skip-permissions";
     };
     functions = {
       fish_prompt = ''
