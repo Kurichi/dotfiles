@@ -5,7 +5,8 @@
   "respectGitignore": false,
   "cleanupPeriodDays": 90,
   "env": {
-    "EDITOR": "nvim"
+    "EDITOR": "nvim",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "permissions": {
     "allow": [
