@@ -32,7 +32,9 @@ Use this skill in these scenarios:
          ↓
 [Read plan file content]
          ↓
-[Call mcp__codex__codex with review request]
+[Assess complexity → Select Codex profile]
+         ↓
+[Call mcp__codex__codex with review request (+ profile when Thorough)]
          ↓
 [Analyze Codex response]
          ↓
@@ -40,6 +42,42 @@ Use this skill in these scenarios:
   ├─ Issues found → Modify plan → mcp__codex__codex-reply → Loop
   └─ Questions → Answer → mcp__codex__codex-reply → Loop
 ```
+
+## Complexity Assessment & Profile Selection
+
+プランの内容を読み取り、複雑さに応じて Codex profile を選択する。
+
+### Profile Tiers
+
+| Tier | Profile | Model | Reasoning | 方針 |
+|------|---------|-------|-----------|------|
+| **Thorough** | `thorough-review` | `gpt-5.1-codex-max` | `xhigh` | 精度重視。deep reasoning 特化モデルで複雑なアーキテクチャを深く分析 |
+| **Standard** | *(省略)* | デフォルト | デフォルト | バランス型。高速かつ十分な推論能力で通常のレビューを処理 |
+
+### Thorough を選択する条件（いずれか1つ以上に該当）
+
+- 変更対象ファイルが **5つ以上**
+- **アーキテクチャ変更**を伴う（新モジュール追加、設計パターン導入・変更、依存関係の大幅な変更）
+- **セキュリティ関連**の変更（認証・認可、暗号化、権限制御、シークレット管理）
+- **データスキーマ変更**（DB スキーマ、API コントラクト、データモデル）
+- **既存の動作変更**を伴うリファクタリング
+
+### Standard（上記に該当しない場合）
+
+通常の機能追加、バグ修正、設定変更、ドキュメント更新など。
+
+### Codex config.toml でのプロファイル定義
+
+`$CODEX_HOME/config.toml`（`~/.config/codex/config.toml`）に以下のプロファイルを定義済み：
+
+```toml
+[profiles.thorough-review]
+model = "gpt-5.1-codex-max"
+model_reasoning_effort = "xhigh"
+```
+
+> Standard tier はデフォルト設定をそのまま使用するためプロファイル定義不要。
+> `approval-policy` はスキル側で `mcp__codex__codex` 呼び出し時にパラメータとして指定する。
 
 ## MCP Tool Usage
 
@@ -54,11 +92,13 @@ Parameters:
   cwd: [Current working directory]
   approval-policy: "never"
   sandbox: "read-only"
+  profile: "thorough-review"  # Thorough tier のみ指定。Standard では省略
 ```
 
 **Important parameters:**
 - `approval-policy: "never"` - Codex should only review, not execute commands
 - `sandbox: "read-only"` - Ensure Codex cannot modify files during review
+- `profile` - Thorough 判定時に `"thorough-review"` を指定。Standard の場合は省略
 
 ### Continuing a Review Conversation
 
@@ -153,6 +193,13 @@ If mcp__codex__codex-reply fails:
 2. Include previous context in new prompt
 ```
 
+### Profile Not Found
+```
+If mcp__codex__codex fails with profile not found error (e.g. "config profile 'thorough-review' not found"):
+1. Retry without profile parameter (fallback to Standard tier)
+2. Inform user that the thorough-review profile is not configured in $CODEX_HOME/config.toml
+```
+
 ## Example Usage
 
 ### Automatic Invocation (Before ExitPlanMode)
@@ -164,12 +211,14 @@ Claude Code thinks: "I'm about to call ExitPlanMode. Let me invoke plan-review f
 
 Claude Code:
 1. Reads plan file content
-2. Calls mcp__codex__codex with review prompt
-3. Receives feedback: "Consider adding error handling for case X"
-4. Updates plan to address feedback
-5. Calls mcp__codex__codex-reply with updated plan
-6. Receives: "LGTM, the plan looks complete now"
-7. Proceeds to ExitPlanMode
+2. Assesses complexity:
+   - "This plan modifies 8 files and introduces a new auth middleware → Thorough"
+3. Calls mcp__codex__codex with review prompt + profile: "thorough-review"
+4. Receives feedback: "Consider adding error handling for case X"
+5. Updates plan to address feedback
+6. Calls mcp__codex__codex-reply with updated plan
+7. Receives: "LGTM, the plan looks complete now"
+8. Proceeds to ExitPlanMode
 ```
 
 ### Explicit Invocation
@@ -179,8 +228,9 @@ User: /plan-review
 
 Claude Code:
 1. Identifies current plan file (if in plan mode) or asks for plan content
-2. Initiates Codex review
-3. Iterates until approval or user decision
+2. Assesses complexity → Selects profile (Thorough or Standard)
+3. Initiates Codex review with selected profile
+4. Iterates until approval or user decision
 ```
 
 ## Integration with ExitPlanMode
