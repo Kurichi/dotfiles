@@ -1,15 +1,15 @@
 ---
 name: plan-review
 description: |
-  Proactively initiates Codex MCP review when completing a plan in plan mode.
+  Proactively initiates Codex CLI review when completing a plan in plan mode.
   Use this skill AUTOMATICALLY before calling ExitPlanMode to get peer review on implementation plans.
-  The skill calls mcp__codex__codex directly (no tmux), analyzes feedback, and iterates until approval.
+  The skill uses `codex exec` directly (not MCP), runs synchronously with real-time output, and iterates until approval.
   Also triggered by explicit /plan-review command.
 ---
 
 # Plan Review
 
-Automatically leverage Codex MCP for plan review before exiting plan mode. This skill uses MCP tools directly without tmux, providing a streamlined review workflow.
+Automatically leverage Codex CLI (`codex exec`) for plan review before exiting plan mode. This skill executes Codex synchronously via Bash, providing real-time progress visibility and straightforward error handling.
 
 ## When to Use
 
@@ -32,26 +32,28 @@ Use this skill in these scenarios:
          ↓
 [Read plan file content]
          ↓
-[Assess complexity → Select Codex profile]
+[Assess complexity → Select tier (Standard / Thorough)]
          ↓
-[Call mcp__codex__codex with review request (+ profile when Thorough)]
+[Run codex exec via Bash with review prompt (output → temp file)]
+         ↓
+[Read output file with Read tool]
          ↓
 [Analyze Codex response]
          ↓
-  ├─ Approved → Proceed to ExitPlanMode
-  ├─ Issues found → Modify plan → mcp__codex__codex-reply → Loop
-  └─ Questions → Answer → mcp__codex__codex-reply → Loop
+  ├─ Approved → Clean up temp files → Proceed to ExitPlanMode
+  ├─ Issues found → Modify plan → Re-run codex exec with context → Loop
+  └─ Questions → Answer → Re-run codex exec with context → Loop
 ```
 
-## Complexity Assessment & Profile Selection
+## Complexity Assessment & Tier Selection
 
-プランの内容を読み取り、複雑さに応じて Codex profile を選択する。
+プランの内容を読み取り、複雑さに応じて Codex の実行ティアを選択する。
 
-### Profile Tiers
+### Tiers
 
 | Tier | Profile | Model | Reasoning | 方針 |
 |------|---------|-------|-----------|------|
-| **Thorough** | `thorough-review` | `gpt-5.1-codex-max` | `xhigh` | 精度重視。deep reasoning 特化モデルで複雑なアーキテクチャを深く分析 |
+| **Thorough** | `-p thorough-review` | `gpt-5.1-codex-max` | `xhigh` | 精度重視。deep reasoning 特化モデルで複雑なアーキテクチャを深く分析 |
 | **Standard** | *(省略)* | デフォルト | デフォルト | バランス型。高速かつ十分な推論能力で通常のレビューを処理 |
 
 ### Thorough を選択する条件（いずれか1つ以上に該当）
@@ -77,43 +79,99 @@ model_reasoning_effort = "xhigh"
 ```
 
 > Standard tier はデフォルト設定をそのまま使用するためプロファイル定義不要。
-> `approval-policy` はスキル側で `mcp__codex__codex` 呼び出し時にパラメータとして指定する。
 
-## MCP Tool Usage
+## Codex Exec Usage
 
-### Starting a Review Session
+### Core Command Pattern
 
-Use `mcp__codex__codex` to initiate the review:
+プロンプトは **stdin 経由**で渡す（コマンド引数だと `ps` で露出するリスクがあるため）。
 
+**重要:** heredoc (`cat <<'EOF'`) ではなく `printf` + `cat` パイプを使用すること。heredoc はレビュー対象テキスト内に区切り文字と同じ行が含まれると早期終了し、後続行がシェルとして実行されるリスクがある。
+
+**Standard tier（デフォルト）:**
+```bash
+set -euo pipefail
+
+REVIEW_OUTPUT=$(mktemp /tmp/codex-plan-review-XXXXXX)
+REVIEW_ERR=$(mktemp /tmp/codex-plan-review-err-XXXXXX)
+# Pre-validate plan file
+test -r "$PLAN_FILE" || { echo "Error: PLAN_FILE not readable: $PLAN_FILE" >&2; exit 1; }
+
+# Truncate output before each iteration (prevents stale output reuse)
+: > "$REVIEW_OUTPUT"
+
+{
+  printf '%s\n\n' "You are reviewing an implementation plan. Please analyze it for:"
+  printf '%s\n' "1. **Correctness** - Will this approach work? Any logical flaws?"
+  printf '%s\n' "2. **Completeness** - Are all necessary steps included? Any missing edge cases?"
+  printf '%s\n' "3. **Architecture** - Is this the right approach? Better patterns available?"
+  printf '%s\n' "4. **Security** - Any potential vulnerabilities introduced?"
+  printf '%s\n\n' "5. **Performance** - Any obvious performance concerns?"
+  printf '%s\n\n' "If the plan looks good, respond with \"LGTM\" or \"Approved\"."
+  printf '%s\n\n' "## Plan to Review"
+  cat -- "$PLAN_FILE" || exit 1
+  printf '\n---\n\n%s\n' "確認や質問は不要です。具体的な提案・修正案・コード例まで自主的に出力してください。"
+} | codex exec \
+  -s read-only \
+  -C "$(pwd)" \
+  --ephemeral \
+  -o "$REVIEW_OUTPUT" \
+  - 2>"$REVIEW_ERR"
 ```
-Tool: mcp__codex__codex
-Parameters:
-  prompt: [Review request with full plan content]
-  cwd: [Current working directory]
-  approval-policy: "never"
-  sandbox: "read-only"
-  profile: "thorough-review"  # Thorough tier のみ指定。Standard では省略
+
+**Thorough tier（複雑なプラン）:**
+```bash
+set -euo pipefail
+
+REVIEW_OUTPUT=$(mktemp /tmp/codex-plan-review-XXXXXX)
+REVIEW_ERR=$(mktemp /tmp/codex-plan-review-err-XXXXXX)
+# Pre-validate plan file
+test -r "$PLAN_FILE" || { echo "Error: PLAN_FILE not readable: $PLAN_FILE" >&2; exit 1; }
+
+# Truncate output before each iteration (prevents stale output reuse)
+: > "$REVIEW_OUTPUT"
+
+{
+  printf '%s\n\n' "You are reviewing an implementation plan. Please analyze it for:"
+  printf '%s\n' "1. **Correctness** - Will this approach work? Any logical flaws?"
+  printf '%s\n' "2. **Completeness** - Are all necessary steps included? Any missing edge cases?"
+  printf '%s\n' "3. **Architecture** - Is this the right approach? Better patterns available?"
+  printf '%s\n' "4. **Security** - Any potential vulnerabilities introduced?"
+  printf '%s\n\n' "5. **Performance** - Any obvious performance concerns?"
+  printf '%s\n\n' "If the plan looks good, respond with \"LGTM\" or \"Approved\"."
+  printf '%s\n\n' "## Plan to Review"
+  cat -- "$PLAN_FILE" || exit 1
+  printf '\n---\n\n%s\n' "確認や質問は不要です。具体的な提案・修正案・コード例まで自主的に出力してください。"
+} | codex exec \
+  -p thorough-review \
+  -s read-only \
+  -C "$(pwd)" \
+  --ephemeral \
+  -o "$REVIEW_OUTPUT" \
+  - 2>"$REVIEW_ERR"
 ```
 
-**Important parameters:**
-- `approval-policy: "never"` - Codex should only review, not execute commands
-- `sandbox: "read-only"` - Ensure Codex cannot modify files during review
-- `profile` - Thorough 判定時に `"thorough-review"` を指定。Standard の場合は省略
+### Key Flags
 
-### Continuing a Review Conversation
+- `-s read-only`: Codex がファイルを変更できないようにする（レビュー専用）
+- `--ephemeral`: セッション履歴を汚さない
+- `-o FILE`: 最終メッセージをファイルに出力 → Claude Code が Read で取得
+- `-C "$(pwd)"`: カレントディレクトリを作業ディレクトリとして指定
+- `-` (ハイフン): stdin からプロンプトを読み取る指定
+- `--full-auto` は**使用しない**（暗黙的に `--sandbox workspace-write` を設定するため `-s read-only` と競合）
+- `-p thorough-review`: Thorough tier 時のみ指定。`config.toml` の `gpt-5.1-codex-max` + `xhigh` reasoning プロファイルを使用
 
-Use `mcp__codex__codex-reply` for follow-ups:
+### Why Not Heredoc
 
-```
-Tool: mcp__codex__codex-reply
-Parameters:
-  threadId: [Thread ID from initial response]
-  prompt: [Your response or updated plan]
-```
+heredoc (`cat <<'DELIM'`) はレビュー対象テキスト内に区切り文字（`DELIM`）と同一の行が含まれると早期終了し、後続行がシェルコマンドとして実行されるリスクがある。`printf` + `cat` パイプパターンはこのリスクを完全に排除する。
+
+### Output File Verification
+
+コマンド実行後、`test -s "$REVIEW_OUTPUT"` で出力ファイルが存在かつ非空であることを確認する。空/未生成の場合はエラーとして扱う（fail-closed）。
 
 ## Review Prompt Template
 
-When calling `mcp__codex__codex`, use this prompt structure:
+`codex exec` に渡すプロンプト構造：
 
 ```
 You are reviewing an implementation plan. Please analyze it for:
@@ -135,12 +193,43 @@ If you have concerns, list them with specific suggestions.
 
 ---
 
-Please provide your review.
+確認や質問は不要です。具体的な提案・修正案・コード例まで自主的に出力してください。
+```
+
+## Iteration (Stateless)
+
+`codex exec` は単発実行のため、反復時は毎回フルコンテキストを送る：
+
+```
+Iteration 1: レビュー依頼 + プラン内容
+Iteration 2: 前回の指摘要約 + 修正差分 + 修正済みプラン全文
+Iteration 3: 同上（最大3回）
+```
+
+2回目以降は「前回指摘 + 修正差分 + 現行全文」に圧縮し、コスト・待ち時間を抑える。
+
+### Iteration Prompt Template (2回目以降)
+
+```
+You are reviewing an updated implementation plan. This is iteration N of review.
+
+## Previous Review Feedback
+[SUMMARY OF PREVIOUS FEEDBACK]
+
+## Changes Made
+[DIFF OR DESCRIPTION OF CHANGES]
+
+## Updated Plan (Full)
+[FULL UPDATED PLAN CONTENT]
+
+---
+
+確認や質問は不要です。具体的な提案・修正案・コード例まで自主的に出力してください。
 ```
 
 ## Completion Detection
 
-Analyze Codex's response to determine next action:
+Codex の出力を Read で取得し、以下の基準で次のアクションを判定する：
 
 ### Approved (Proceed to ExitPlanMode)
 - Contains: "LGTM", "Looks good", "Approved", "No issues", "Good to go"
@@ -151,12 +240,12 @@ Analyze Codex's response to determine next action:
 - Lists specific issues or concerns
 - Suggests alternative approaches
 - Points out missing considerations
-- Action: Modify the plan, then use `mcp__codex__codex-reply` with updates
+- Action: Modify the plan, then re-run `codex exec` with iteration context
 
 ### Questions/Clarification Needed
 - Asks questions about the approach
 - Needs more context
-- Action: Provide answers via `mcp__codex__codex-reply`
+- Action: Provide answers in next `codex exec` iteration
 
 ## Iteration Limit
 
@@ -169,36 +258,61 @@ If after 3 rounds of feedback the plan is still not approved:
    - Proceed with ExitPlanMode despite concerns
    - Abandon the plan and reconsider
 
-## Error Handling
+## Error Handling (Fail-closed)
 
-### MCP Server Not Connected
-```
-If mcp__codex__codex fails with connection error:
-1. Inform user: "Codex MCP server is not available"
-2. Ask user: "Proceed without review, or wait for MCP connection?"
-3. If proceed: Continue to ExitPlanMode with warning
-```
+デフォルトは **fail-closed**（レビュー失敗時は停止し、ユーザーに明示的な判断を求める）。
 
-### Timeout (No Response)
+### Codex Not Installed
 ```
-If Codex does not respond within reasonable time:
-1. Inform user of the delay
-2. Offer to retry or proceed without review
+If codex command is not found:
+1. Inform user: "codex CLI がインストールされていません"
+2. Suggest: PATH 確認と npm install -g @openai/codex を案内
+3. Action: 停止（自動スキップしない）
 ```
 
-### Invalid Thread ID
+### Non-zero Exit Code
 ```
-If mcp__codex__codex-reply fails:
-1. Start a new review session with mcp__codex__codex
-2. Include previous context in new prompt
+If codex exec returns non-zero exit code:
+1. Read $REVIEW_ERR to get error details
+2. Summarize error to user
+3. Ask user: "リトライ / レビューなしで続行" を確認（自動スキップしない）
+```
+
+### Timeout
+```
+Bash tool の timeout パラメータを使用：
+- Standard tier: 300000ms (5分)
+- Thorough tier: 600000ms (10分)
+タイムアウト時はユーザーに報告して判断を仰ぐ
 ```
 
 ### Profile Not Found
 ```
-If mcp__codex__codex fails with profile not found error (e.g. "config profile 'thorough-review' not found"):
-1. Retry without profile parameter (fallback to Standard tier)
+If codex exec fails with profile not found error (e.g. "config profile 'thorough-review' not found"):
+1. Fallback: -m gpt-5.1-codex-max -c model_reasoning_effort="xhigh" でインライン指定にフォールバック
 2. Inform user that the thorough-review profile is not configured in $CODEX_HOME/config.toml
 ```
+
+### Empty Output File
+```
+If $REVIEW_OUTPUT is empty or does not exist after execution:
+1. Read $REVIEW_ERR for error details
+2. Report to user as review failure
+3. Action: 停止（自動スキップしない）
+```
+
+## Temporary File Cleanup
+
+**重要:** `trap ... EXIT` は使用しない。Bash ツールの呼び出し終了時にファイルが削除され、次の Read ツールで読めなくなるため。
+
+クリーンアップは以下の手順で行う：
+1. `codex exec` を Bash ツールで実行（出力ファイルパスを記録）
+2. Read ツールで `$REVIEW_OUTPUT` を読み取り、内容を確認
+3. レビュー完了後（全イテレーション終了後）に Bash ツールで `rm -f "$REVIEW_OUTPUT" "$REVIEW_ERR"` を実行
+
+反復ループ内では同一ファイルパスを再利用する。
+
+**反復時のステール出力防止:** 各イテレーション実行前に `: > "$REVIEW_OUTPUT"` で出力ファイルを truncate すること。これにより、再実行が書き込み前に失敗した場合に前回の出力を誤って読み取ることを防ぐ。判定は常にコマンド終了コードを先に確認し、成功時のみ出力ファイルを読む。
 
 ## Example Usage
 
@@ -213,12 +327,13 @@ Claude Code:
 1. Reads plan file content
 2. Assesses complexity:
    - "This plan modifies 8 files and introduces a new auth middleware → Thorough"
-3. Calls mcp__codex__codex with review prompt + profile: "thorough-review"
-4. Receives feedback: "Consider adding error handling for case X"
+3. Runs codex exec via Bash with review prompt + -p thorough-review
+4. Reads output file with Read tool → feedback: "Consider adding error handling for case X"
 5. Updates plan to address feedback
-6. Calls mcp__codex__codex-reply with updated plan
-7. Receives: "LGTM, the plan looks complete now"
-8. Proceeds to ExitPlanMode
+6. Re-runs codex exec with iteration context (previous feedback + updated plan)
+7. Reads output file with Read tool → "LGTM, the plan looks complete now"
+8. Cleans up temp files with Bash: rm -f "$REVIEW_OUTPUT" "$REVIEW_ERR"
+9. Proceeds to ExitPlanMode
 ```
 
 ### Explicit Invocation
@@ -228,8 +343,8 @@ User: /plan-review
 
 Claude Code:
 1. Identifies current plan file (if in plan mode) or asks for plan content
-2. Assesses complexity → Selects profile (Thorough or Standard)
-3. Initiates Codex review with selected profile
+2. Assesses complexity → Selects tier (Thorough or Standard)
+3. Runs codex exec via Bash with review prompt
 4. Iterates until approval or user decision
 ```
 
