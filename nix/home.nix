@@ -36,6 +36,7 @@
     fzf
     ghq
     jq
+    just
     tree
     tmux
 
