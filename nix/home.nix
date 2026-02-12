@@ -44,7 +44,7 @@
     nodePackages.pnpm
     bun
     uv
-    go
+    go_1_26
     rustup
 
     # Git tools
