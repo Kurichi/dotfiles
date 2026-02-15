@@ -13,7 +13,7 @@
     enable = true;
     onActivation = {
       autoUpdate = true;
-      cleanup = "none";  # Keep existing packages not in this list
+      cleanup = "zap";  # Remove undeclared packages and their associated files
     };
     caskArgs.appdir = "/Applications";
     casks = [

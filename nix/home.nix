@@ -68,6 +68,16 @@
     # Infrastructure
     terraform
 
+    # Linters
+    actionlint
+    shellcheck
+
+    # Build tools
+    ninja
+
+    # PDF tools
+    pkgs."poppler-utils"  # pdftotext, pdftoppm 等
+
     # Tools
     tailscale
     valkey
