@@ -28,9 +28,8 @@
       pkgs = nixpkgs.legacyPackages.${system};
       llmPkgs = llm-agents.packages.${system};
       gwqPkg = pkgs.callPackage ./nix/packages/gwq.nix { };
-    in
-    {
-      darwinConfigurations.macos = nix-darwin.lib.darwinSystem {
+
+      mkDarwin = { username, hostname }: nix-darwin.lib.darwinSystem {
         inherit system;
         modules = [
           ./nix/darwin.nix
@@ -44,6 +43,18 @@
           }
         ];
         specialArgs = { inherit inputs username hostname llmPkgs; };
+      };
+      in
+      {
+        darwinConfigurations = {
+          personal = {
+            username = "kurichi";
+            hostname = "kurichi-MacBook-Pro";
+          };
+	  ca = {
+            username = "s30264";
+            hostname = "CA-20036999";
+          };
       };
     };
 }
