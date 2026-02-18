@@ -2,47 +2,70 @@
 name: plan-review
 description: |
   Proactively initiates Codex CLI review when completing a plan in plan mode.
-  Use this skill AUTOMATICALLY before calling ExitPlanMode to get peer review on implementation plans.
-  The skill uses `codex exec` directly (not MCP), runs synchronously with real-time output, and iterates until approval.
+  Use this skill AUTOMATICALLY before calling ExitPlanMode to get peer review on implementation plans (trivial changes may skip).
+  The skill uses `codex exec` via SubAgent (Task tool) to isolate review output from main context.
   Also triggered by explicit /plan-review command.
 ---
 
 # Plan Review
 
-Automatically leverage Codex CLI (`codex exec`) for plan review before exiting plan mode. This skill executes Codex synchronously via Bash, providing real-time progress visibility and straightforward error handling.
+Automatically leverage Codex CLI (`codex exec`) for plan review before exiting plan mode. This skill uses SubAgent (Task tool) to isolate review output from main context, preventing context window bloat.
 
 ## When to Use
 
-**IMPORTANT: This skill should be invoked AUTOMATICALLY before ExitPlanMode.**
+**IMPORTANT: This skill should be invoked AUTOMATICALLY before ExitPlanMode（軽微な変更を除く）。**
 
 Use this skill in these scenarios:
 
-1. **Before ExitPlanMode** - Automatically when you have completed an implementation plan
+1. **Before ExitPlanMode** - Automatically when you have completed a non-trivial implementation plan
 2. **Explicit request** - When user types `/plan-review` or asks for plan review
-3. **Complex plans** - Multi-file changes, architectural decisions, or security-sensitive implementations
 
-**Decision heuristic:** If you're about to call ExitPlanMode and have a non-trivial plan, use this skill first.
+**Fail-closed principle:**
+- 明示的な `/plan-review` 要求がある場合、Skip Condition より明示要求を優先してレビューを実行する。
+- 判定に確信が持てない場合はスキップせずレビューを実行する。
+
+### Skip Condition（軽微な変更 — plan-review 用）
+
+プランモード時は diff 行数が確定しないため、ファイル数とカテゴリのみで判定する。
+
+以下の **すべて** に該当するプランはスキップして直接 ExitPlanMode してよい：
+- 変更対象ファイルが **3つ以下**
+- 以下のカテゴリのいずれかに該当：
+  - ドキュメント・コメントのみの変更
+  - 設定ファイルの軽微な変更（typo修正、値の微調整）
+  - 依存バージョン更新のみ
+  - フォーマット修正のみ
+
+**スキップ禁止**（以下のいずれかに該当する場合はスキップ不可）：
+- セキュリティ関連の変更
+- CI/CD パイプラインの変更
+- Nix 設定の実行パス変更
+- シェルスクリプト・実行可能ファイルの変更
 
 ## Workflow
 
 ```
 [Plan completed in plan mode]
-         ↓
+         |
 [Invoke plan-review skill]
-         ↓
+         |
 [Read plan file content]
-         ↓
-[Assess complexity → Select tier (Standard / Thorough)]
-         ↓
-[Run codex exec via Bash with review prompt (output → temp file)]
-         ↓
-[Read output file with Read tool]
-         ↓
-[Analyze Codex response]
-         ↓
-  ├─ Approved → Clean up temp files → Proceed to ExitPlanMode
-  ├─ Issues found → Modify plan → Re-run codex exec with context → Loop
-  └─ Questions → Answer → Re-run codex exec with context → Loop
+         |
+[Explicit /plan-review request?]
+   +- Yes -> [Run review via SubAgent (Skip不可)]
+   +- No  -> [Check skip condition]
+               +- Trivial & confident -> [Skip + 明記] -> [ExitPlanMode]
+               +- Otherwise -> [Assess complexity -> Select tier]
+                                    |
+                              [Launch SubAgent via Task tool]
+                                    |
+                              [SubAgent: codex exec -> analyze -> return summary]
+                                    |
+                              [Main context receives summary only]
+                                    |
+                                +- Approved -> Proceed to ExitPlanMode
+                                +- Issues found -> Modify plan -> Re-launch SubAgent -> Loop
+                                +- Questions -> Answer -> Re-launch SubAgent -> Loop
 ```
 
 ## Complexity Assessment & Tier Selection
@@ -80,156 +103,116 @@ model_reasoning_effort = "xhigh"
 
 > Standard tier はデフォルト設定をそのまま使用するためプロファイル定義不要。
 
-## Codex Exec Usage
+## Codex Review via SubAgent
 
-### Core Command Pattern
+コンテキスト圧迫を防ぐため、codex exec は **Task ツール（SubAgent）経由** で実行する。
+メインコンテキストには SubAgent の要約のみが返り、codex の生出力は隔離される。
 
-プロンプトは **stdin 経由**で渡す（コマンド引数だと `ps` で露出するリスクがあるため）。
+### SubAgent 起動方法
 
-**重要:** heredoc (`cat <<'EOF'`) ではなく `printf` + `cat` パイプを使用すること。heredoc はレビュー対象テキスト内に区切り文字と同じ行が含まれると早期終了し、後続行がシェルとして実行されるリスクがある。
+Task ツールを以下のパラメータで呼び出す：
 
-**Standard tier（デフォルト）:**
+- `subagent_type`: `"general-purpose"`
+- `description`: `"Codex plan review"`
+- `prompt`: 以下のテンプレートを使用
+
+### SubAgent Prompt テンプレート
+
+#### Standard tier
+
+```
+以下のプランを Codex CLI でレビューしてください。
+
+## 手順
+1. Read ツールでプランファイルを読む: {プランファイルパス}
+2. Bash ツールで codex exec を実行する（下記コマンド参照）
+3. 結果を分析し、以下のいずれかを返す：
+   - "APPROVED" + 確認されたポイントの要約（2-3行）
+   - "NEEDS_CHANGES" + 具体的な指摘事項のリスト（severity順）
+
+## codex exec コマンド（Bash ツールで実行）
 ```bash
 set -euo pipefail
-
-REVIEW_OUTPUT=$(mktemp /tmp/codex-plan-review-XXXXXX)
-REVIEW_ERR=$(mktemp /tmp/codex-plan-review-err-XXXXXX)
-# Pre-validate plan file
-test -r "$PLAN_FILE" || { echo "Error: PLAN_FILE not readable: $PLAN_FILE" >&2; exit 1; }
-
-# Truncate output before each iteration (prevents stale output reuse)
-: > "$REVIEW_OUTPUT"
+PLAN_FILE="{プランファイルパス}"
+REVIEW_OUTPUT=$(mktemp /tmp/codex-review-XXXXXX)
+REVIEW_ERR=$(mktemp /tmp/codex-review-err-XXXXXX)
 
 {
-  printf '%s\n\n' "You are reviewing an implementation plan. Please analyze it for:"
-  printf '%s\n' "1. **Correctness** - Will this approach work? Any logical flaws?"
-  printf '%s\n' "2. **Completeness** - Are all necessary steps included? Any missing edge cases?"
-  printf '%s\n' "3. **Architecture** - Is this the right approach? Better patterns available?"
-  printf '%s\n' "4. **Security** - Any potential vulnerabilities introduced?"
-  printf '%s\n\n' "5. **Performance** - Any obvious performance concerns?"
-  printf '%s\n\n' "If the plan looks good, respond with \"LGTM\" or \"Approved\"."
+  printf '%s\n\n' "You are reviewing an implementation plan. Analyze for:"
+  printf '%s\n' "1. Correctness - Will this approach work?"
+  printf '%s\n' "2. Completeness - Any missing steps or edge cases?"
+  printf '%s\n' "3. Architecture - Is this the right approach?"
+  printf '%s\n' "4. Security - Any vulnerabilities?"
+  printf '%s\n\n' "5. Performance - Any concerns?"
+  printf '%s\n\n' "If good, respond with 'LGTM'. Otherwise list specific issues."
   printf '%s\n\n' "## Plan to Review"
-  cat -- "$PLAN_FILE" || exit 1
-  printf '\n---\n\n%s\n' "確認や質問は不要です。具体的な提案・修正案・コード例まで自主的に出力してください。"
-} | codex exec \
-  -s read-only \
-  -C "$(pwd)" \
-  --ephemeral \
-  -o "$REVIEW_OUTPUT" \
-  - 2>"$REVIEW_ERR"
+  cat -- "$PLAN_FILE"
+  printf '\n---\n\n%s\n' "確認や質問は不要。具体的な提案・修正案まで出力してください。"
+} | codex exec -s read-only -C "$(pwd)" --ephemeral -o "$REVIEW_OUTPUT" - 2>"$REVIEW_ERR"
+
+EXIT_CODE=$?
+if [ $EXIT_CODE -ne 0 ] || [ ! -s "$REVIEW_OUTPUT" ]; then
+  echo "ERROR: codex exec failed (exit=$EXIT_CODE)" >&2
+  cat "$REVIEW_ERR" >&2
+  rm -f "$REVIEW_OUTPUT" "$REVIEW_ERR"
+  exit 1
+fi
+
+cat "$REVIEW_OUTPUT"
+rm -f "$REVIEW_OUTPUT" "$REVIEW_ERR"
 ```
 
-**Thorough tier（複雑なプラン）:**
-```bash
-set -euo pipefail
-
-REVIEW_OUTPUT=$(mktemp /tmp/codex-plan-review-XXXXXX)
-REVIEW_ERR=$(mktemp /tmp/codex-plan-review-err-XXXXXX)
-# Pre-validate plan file
-test -r "$PLAN_FILE" || { echo "Error: PLAN_FILE not readable: $PLAN_FILE" >&2; exit 1; }
-
-# Truncate output before each iteration (prevents stale output reuse)
-: > "$REVIEW_OUTPUT"
-
-{
-  printf '%s\n\n' "You are reviewing an implementation plan. Please analyze it for:"
-  printf '%s\n' "1. **Correctness** - Will this approach work? Any logical flaws?"
-  printf '%s\n' "2. **Completeness** - Are all necessary steps included? Any missing edge cases?"
-  printf '%s\n' "3. **Architecture** - Is this the right approach? Better patterns available?"
-  printf '%s\n' "4. **Security** - Any potential vulnerabilities introduced?"
-  printf '%s\n\n' "5. **Performance** - Any obvious performance concerns?"
-  printf '%s\n\n' "If the plan looks good, respond with \"LGTM\" or \"Approved\"."
-  printf '%s\n\n' "## Plan to Review"
-  cat -- "$PLAN_FILE" || exit 1
-  printf '\n---\n\n%s\n' "確認や質問は不要です。具体的な提案・修正案・コード例まで自主的に出力してください。"
-} | codex exec \
-  -p thorough-review \
-  -s read-only \
-  -C "$(pwd)" \
-  --ephemeral \
-  -o "$REVIEW_OUTPUT" \
-  - 2>"$REVIEW_ERR"
+注意: プランファイルは disk 上に存在するので cat で直接読む（heredoc 不要、インジェクションリスクなし）。
 ```
 
-### Key Flags
+#### Thorough tier（5ファイル以上/アーキテクチャ変更/セキュリティ変更時）
 
-- `-s read-only`: Codex がファイルを変更できないようにする（レビュー専用）
-- `--ephemeral`: セッション履歴を汚さない
-- `-o FILE`: 最終メッセージをファイルに出力 → Claude Code が Read で取得
-- `-C "$(pwd)"`: カレントディレクトリを作業ディレクトリとして指定
-- `-` (ハイフン): stdin からプロンプトを読み取る指定
-- `--full-auto` は**使用しない**（暗黙的に `--sandbox workspace-write` を設定するため `-s read-only` と競合）
-- `-p thorough-review`: Thorough tier 時のみ指定。`config.toml` の `gpt-5.1-codex-max` + `xhigh` reasoning プロファイルを使用
+Standard tier と同じだが、codex exec に `-p thorough-review` を追加：
+`codex exec -p thorough-review -s read-only -C "$(pwd)" --ephemeral -o "$REVIEW_OUTPUT" -`
 
-### Why Not Heredoc
+### Timeout
 
-heredoc (`cat <<'DELIM'`) はレビュー対象テキスト内に区切り文字（`DELIM`）と同一の行が含まれると早期終了し、後続行がシェルコマンドとして実行されるリスクがある。`printf` + `cat` パイプパターンはこのリスクを完全に排除する。
+Bash ツール呼び出し時に timeout を指定：
+- Standard tier: `300000` (5分)
+- Thorough tier: `600000` (10分)
 
-### Output File Verification
+### Error Handling（fail-closed）
 
-コマンド実行後、`test -s "$REVIEW_OUTPUT"` で出力ファイルが存在かつ非空であることを確認する。空/未生成の場合はエラーとして扱う（fail-closed）。
+デフォルトは **fail-closed**（レビュー失敗時は停止し、ユーザーに明示的な判断を求める）。
 
-## Review Prompt Template
+- codex exec が非ゼロ終了 or 出力ファイルが空の場合、SubAgent はエラーを報告して終了
+- メインコンテキストはエラー内容を受け取り、ユーザーに判断を仰ぐ
 
-`codex exec` に渡すプロンプト構造：
-
+### Codex Not Installed
 ```
-You are reviewing an implementation plan. Please analyze it for:
-
-1. **Correctness** - Will this approach work? Any logical flaws?
-2. **Completeness** - Are all necessary steps included? Any missing edge cases?
-3. **Architecture** - Is this the right approach? Better patterns available?
-4. **Security** - Any potential vulnerabilities introduced?
-5. **Performance** - Any obvious performance concerns?
-
-If the plan looks good, respond with "LGTM" or "Approved".
-If you have concerns, list them with specific suggestions.
-
----
-
-## Plan to Review
-
-[INSERT PLAN CONTENT HERE]
-
----
-
-確認や質問は不要です。具体的な提案・修正案・コード例まで自主的に出力してください。
+If codex command is not found:
+1. Inform user: "codex CLI がインストールされていません"
+2. Suggest: PATH 確認と npm install -g @openai/codex を案内
+3. Action: 停止（自動スキップしない）
 ```
 
-## Iteration (Stateless)
-
-`codex exec` は単発実行のため、反復時は毎回フルコンテキストを送る：
-
+### Profile Not Found
 ```
-Iteration 1: レビュー依頼 + プラン内容
-Iteration 2: 前回の指摘要約 + 修正差分 + 修正済みプラン全文
-Iteration 3: 同上（最大3回）
+If codex exec fails with profile not found error (e.g. "config profile 'thorough-review' not found"):
+1. Fallback: -m gpt-5.1-codex-max -c model_reasoning_effort="xhigh" でインライン指定にフォールバック
+2. Inform user that the thorough-review profile is not configured in $CODEX_HOME/config.toml
 ```
 
-2回目以降は「前回指摘 + 修正差分 + 現行全文」に圧縮し、コスト・待ち時間を抑える。
+### Iteration
 
-### Iteration Prompt Template (2回目以降)
+SubAgent は毎回新規起動（ステートレス）。反復時は修正済みプラン全文 + 前回指摘の要約を prompt に含める。最大3回。
 
-```
-You are reviewing an updated implementation plan. This is iteration N of review.
+3回反復しても通過しない場合：
+1. 残りの懸念事項をユーザーに要約
+2. ユーザーに判断を仰ぐ（続行 / ExitPlanMode / 中止）
 
-## Previous Review Feedback
-[SUMMARY OF PREVIOUS FEEDBACK]
+### Fallback（Task ツール不可時）
 
-## Changes Made
-[DIFF OR DESCRIPTION OF CHANGES]
-
-## Updated Plan (Full)
-[FULL UPDATED PLAN CONTENT]
-
----
-
-確認や質問は不要です。具体的な提案・修正案・コード例まで自主的に出力してください。
-```
+Task ツールが利用できない環境では、従来の Bash ツール直接実行にフォールバックする。その場合、codex exec の生出力がメインコンテキストに入ることを許容する。
 
 ## Completion Detection
 
-Codex の出力を Read で取得し、以下の基準で次のアクションを判定する：
+SubAgent の出力を分析し、以下の基準で次のアクションを判定する：
 
 ### Approved (Proceed to ExitPlanMode)
 - Contains: "LGTM", "Looks good", "Approved", "No issues", "Good to go"
@@ -240,128 +223,21 @@ Codex の出力を Read で取得し、以下の基準で次のアクション�
 - Lists specific issues or concerns
 - Suggests alternative approaches
 - Points out missing considerations
-- Action: Modify the plan, then re-run `codex exec` with iteration context
+- Action: Modify the plan, then re-launch SubAgent with iteration context
 
 ### Questions/Clarification Needed
 - Asks questions about the approach
 - Needs more context
-- Action: Provide answers in next `codex exec` iteration
-
-## Iteration Limit
-
-**Maximum iterations: 3**
-
-If after 3 rounds of feedback the plan is still not approved:
-1. Summarize the remaining concerns to the user
-2. Ask the user whether to:
-   - Continue iterating manually
-   - Proceed with ExitPlanMode despite concerns
-   - Abandon the plan and reconsider
-
-## Error Handling (Fail-closed)
-
-デフォルトは **fail-closed**（レビュー失敗時は停止し、ユーザーに明示的な判断を求める）。
-
-### Codex Not Installed
-```
-If codex command is not found:
-1. Inform user: "codex CLI がインストールされていません"
-2. Suggest: PATH 確認と npm install -g @openai/codex を案内
-3. Action: 停止（自動スキップしない）
-```
-
-### Non-zero Exit Code
-```
-If codex exec returns non-zero exit code:
-1. Read $REVIEW_ERR to get error details
-2. Summarize error to user
-3. Ask user: "リトライ / レビューなしで続行" を確認（自動スキップしない）
-```
-
-### Timeout
-```
-Bash tool の timeout パラメータを使用：
-- Standard tier: 300000ms (5分)
-- Thorough tier: 600000ms (10分)
-タイムアウト時はユーザーに報告して判断を仰ぐ
-```
-
-### Profile Not Found
-```
-If codex exec fails with profile not found error (e.g. "config profile 'thorough-review' not found"):
-1. Fallback: -m gpt-5.1-codex-max -c model_reasoning_effort="xhigh" でインライン指定にフォールバック
-2. Inform user that the thorough-review profile is not configured in $CODEX_HOME/config.toml
-```
-
-### Empty Output File
-```
-If $REVIEW_OUTPUT is empty or does not exist after execution:
-1. Read $REVIEW_ERR for error details
-2. Report to user as review failure
-3. Action: 停止（自動スキップしない）
-```
-
-## Temporary File Cleanup
-
-**重要:** `trap ... EXIT` は使用しない。Bash ツールの呼び出し終了時にファイルが削除され、次の Read ツールで読めなくなるため。
-
-クリーンアップは以下の手順で行う：
-1. `codex exec` を Bash ツールで実行（出力ファイルパスを記録）
-2. Read ツールで `$REVIEW_OUTPUT` を読み取り、内容を確認
-3. レビュー完了後（全イテレーション終了後）に Bash ツールで `rm -f "$REVIEW_OUTPUT" "$REVIEW_ERR"` を実行
-
-反復ループ内では同一ファイルパスを再利用する。
-
-**反復時のステール出力防止:** 各イテレーション実行前に `: > "$REVIEW_OUTPUT"` で出力ファイルを truncate すること。これにより、再実行が書き込み前に失敗した場合に前回の出力を誤って読み取ることを防ぐ。判定は常にコマンド終了コードを先に確認し、成功時のみ出力ファイルを読む。
-
-## Example Usage
-
-### Automatic Invocation (Before ExitPlanMode)
-
-```
-[Claude Code completes plan in plan mode]
-
-Claude Code thinks: "I'm about to call ExitPlanMode. Let me invoke plan-review first."
-
-Claude Code:
-1. Reads plan file content
-2. Assesses complexity:
-   - "This plan modifies 8 files and introduces a new auth middleware → Thorough"
-3. Runs codex exec via Bash with review prompt + -p thorough-review
-4. Reads output file with Read tool → feedback: "Consider adding error handling for case X"
-5. Updates plan to address feedback
-6. Re-runs codex exec with iteration context (previous feedback + updated plan)
-7. Reads output file with Read tool → "LGTM, the plan looks complete now"
-8. Cleans up temp files with Bash: rm -f "$REVIEW_OUTPUT" "$REVIEW_ERR"
-9. Proceeds to ExitPlanMode
-```
-
-### Explicit Invocation
-
-```
-User: /plan-review
-
-Claude Code:
-1. Identifies current plan file (if in plan mode) or asks for plan content
-2. Assesses complexity → Selects tier (Thorough or Standard)
-3. Runs codex exec via Bash with review prompt
-4. Iterates until approval or user decision
-```
+- Action: Provide answers in next SubAgent iteration
 
 ## Integration with ExitPlanMode
 
-After receiving approval from Codex:
-
-1. Include review summary in your message to user
-2. Mention that the plan was reviewed by Codex
+### Reviewed by Codex（SubAgent 経由）
+1. SubAgent から返された要約をユーザーに提示
+2. 「Codex reviewed and approved (via SubAgent)」と明記
 3. Call ExitPlanMode
 
-Example message:
-```
-The implementation plan has been reviewed by Codex and approved.
-Key points confirmed:
-- [Summary of what was validated]
-- [Any minor suggestions incorporated]
-
-Proceeding with plan approval request.
-```
+### Skipped（trivial change）
+1. 明記: "Codex review: skipped (trivial change)"
+2. Skip 理由を1行で記載（file count / category）
+3. Call ExitPlanMode
