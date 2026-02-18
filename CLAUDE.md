@@ -69,14 +69,11 @@ config/
 
 ## タスク実行時のワークフロー
 
-タスクを遂行する際は `gwq` を使用して git worktree を作成し、独立した作業環境で実施すること。
+あなたは既に作業用の git worktree 内で起動されていることを前提とする。worktree の作成・削除はユーザーが行う。
 
-### 手順
-
-1. **worktree 作成**: `gwq get <repository>` または `gwq add` で新しい worktree を作成
-2. **ディレクトリ移動**: 作成した worktree に `cd` で移動
-3. **作業実施**: その worktree 内でタスクを遂行
-4. **後処理**: PR がマージされたら `gwq remove` で worktree を削除
+- main ブランチのワークツリーに直接変更を加えないこと
+- worktree の作成（`gwq add`）、移動（`gwq cd`）、削除（`gwq remove`）は自分で行わないこと
+- **起動時のカレントディレクトリから `cd` で離れないこと**（PreToolUse hook で main worktree への移動はブロックされる）
 
 ### ブランチ命名規則
 

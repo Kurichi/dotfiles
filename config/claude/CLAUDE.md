@@ -41,11 +41,12 @@
 - `./.github/PULL_REQUEST_TEMPLATE.md` が存在する場合，それを元にPRを作成してください．
 
 ### 作業ワークフロー
-- 作業は必ず git worktree 上で行うこと。main ブランチのワークツリーに直接変更を加えない。
-- 一連の作業が完了したら、ユーザーに確認せず自動的に Codex CLI（`codex exec review --uncommitted`）を使用してレビューを依頼すること。
-- Codex CLI のレビューで修正依頼があれば修正し、再度レビューを依頼する。修正依頼がなくなるまで繰り返すこと。
-- Codex CLI のレビューが通過したら、ユーザーに確認せず自動的にコミット・プッシュ・PR 作成まで行うこと。
+- あなたは既に作業用 worktree 内で起動されていることを前提とする。worktree の作成・移動・削除（`gwq add`、`gwq cd`、`gwq remove` 等）は自分で行わないこと。
+- main ブランチのワークツリーに直接変更を加えないこと。**起動時のカレントディレクトリから `cd` で離れないこと。**（PreToolUse hook で linked worktree 上での cd/pushd/popd はブロックされる）
+- `codex exec` の実行は **Task ツール（SubAgent）経由** で行い、生の出力によるコンテキスト圧迫を防ぐこと。
+- 一連の作業が完了したら、code-review スキルを使用してレビューを依頼すること。
+- レビューが通過したら、ユーザーに確認せず自動的にコミット・プッシュ・PR 作成まで行うこと。
 
 ## プランモード
 
-ExitPlanMode を呼ぶ前に、必ず plan-review スキルを使用して Codex CLI にレビューを依頼すること。
+ExitPlanMode を呼ぶ前に、plan-review スキルを使用して Codex CLI にレビューを依頼すること。ただし、plan-review スキルの「Skip Condition」に該当する場合はスキップしてよい。

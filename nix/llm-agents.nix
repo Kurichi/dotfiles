@@ -33,6 +33,7 @@ in
   home.file.".config/claude/CLAUDE.md".source = ../config/claude/CLAUDE.md;
   home.file.".config/claude/skills".source = ../config/claude/skills;
   home.file.".config/claude/commands".source = ../config/claude/commands;
+  home.file.".config/claude/hooks".source = ../config/claude/hooks;
 
   # Gemini CLI configuration
   home.file.".config/.gemini/GEMINI.md".source = ../config/gemini/GEMINI.md;
