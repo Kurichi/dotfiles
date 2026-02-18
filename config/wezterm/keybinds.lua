@@ -53,8 +53,17 @@ local function smart_split(direction)
   end)
 end
 
--- ステータスバーにアクティブなキーテーブルを表示
+-- 通知ステート（ウィンドウごとにコピー通知の有効期限を管理）
+local copy_notification_until = {} -- window_id -> expire timestamp
+
+-- ステータスバーにアクティブなキーテーブルまたは通知を表示
 wezterm.on("update-right-status", function(window, _)
+  local wid = tostring(window:window_id())
+  if copy_notification_until[wid] and os.time() < copy_notification_until[wid] then
+    window:set_right_status("📋 Copied!")
+    return
+  end
+  copy_notification_until[wid] = nil
   local name = window:active_key_table()
   window:set_right_status(name and ("TABLE: " .. name) or "")
 end)
@@ -101,6 +110,28 @@ local keys = {
 
   -- その他
   { key = "Enter", mods = "SHIFT", action = act.SendString("\x1b\r") },
+
+  -- 直前のコマンドと出力をコピー (Semantic Zones 利用)
+  {
+    key = "z",
+    mods = "LEADER",
+    action = wezterm.action_callback(function(window, pane)
+      window:perform_action(act.ActivateCopyMode, pane)
+      window:perform_action(act.CopyMode({ MoveBackwardZoneOfType = "Input" }), pane)
+      window:perform_action(act.CopyMode({ SetSelectionMode = "Cell" }), pane)
+      window:perform_action(act.CopyMode({ MoveForwardZoneOfType = "Prompt" }), pane)
+      window:perform_action(act.CopyMode("MoveUp"), pane)
+      window:perform_action(act.CopyMode("MoveToEndOfLineContent"), pane)
+      window:perform_action(
+        act.Multiple({
+          { CopyTo = "ClipboardAndPrimarySelection" },
+          close_copy_mode,
+        }),
+        pane
+      )
+      copy_notification_until[tostring(window:window_id())] = os.time() + 3
+    end),
+  },
 }
 
 -- タブ番号キーを追加

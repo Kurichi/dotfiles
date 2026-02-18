@@ -62,6 +62,7 @@ wezterm.on("gui-startup", function(cmd)
   window:gui_window():maximize()
 end)
 
+config.leader = { key = "b", mods = "CTRL", timeout_milliseconds = 1000 }
 config.keys = require("keybinds").keys
 config.key_tables = require("keybinds").key_tables
 config.disable_default_key_bindings = true
