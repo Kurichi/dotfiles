@@ -43,7 +43,7 @@
   system = {
     defaults = {
       dock = {
-        autohide = true;
+        autohide = false;
         show-recents = false;
         mru-spaces = false;
       };
@@ -58,6 +58,10 @@
         InitialKeyRepeat = 15;
         KeyRepeat = 2;
       };
+      screensaver = {
+        askForPassword = true;
+        askForPasswordDelay = 0;
+      };
       controlcenter = {
         BatteryShowPercentage = true;
       };
@@ -65,6 +69,9 @@
     # Used for backwards compatibility
     stateVersion = 5;
   };
+
+  # Power management
+  power.sleep.display = "never";
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
