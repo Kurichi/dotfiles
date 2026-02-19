@@ -1,5 +1,12 @@
-{ pkgs, username, hostname, ... }:
+{ pkgs, lib, profile, ... }:
+let
+  inherit (profile) username hostname passwordManager;
 
+  passwordManagerCask = {
+    "1password" = "1password";
+    "bitwarden" = "bitwarden";
+  }.${passwordManager};
+in
 {
   # Nix settings (Determinate Nix manages the daemon)
   nix.enable = false;
@@ -17,23 +24,15 @@
     };
     caskArgs.appdir = "/Applications";
     casks = [
-      "1password"
+      passwordManagerCask
       "adobe-acrobat-reader"
-      "datagrip"
-      "discord"
       "doll"
       "google-drive"
       "orbstack"
-      "postman-agent"
       "raycast"
-      "slack"
-      "steam"
       "wezterm@nightly"
-      "zoom"
-    ];
-    masApps = {
-      LINE = 539883307;
-    };
+    ] ++ profile.extraCasks;
+    masApps = {} // profile.extraMasApps;
   };
 
   # Primary user (required for system.defaults options)

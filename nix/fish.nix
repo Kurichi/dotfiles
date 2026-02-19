@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, profile, ... }:
 
 {
   # Fish functions from external files
@@ -45,7 +45,7 @@
       kube = "kubectl";
       k8s = "kubectl";
       # nix
-      rebuild = "darwin-rebuild switch --flake ~/repos/dotfiles#macos";
+      rebuild = "darwin-rebuild switch --flake ~/repos/dotfiles#${profile.profileName}";
       # claude
       claude = "claude --allow-dangerously-skip-permissions";
     };

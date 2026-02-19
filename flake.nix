@@ -22,28 +22,44 @@
 
   outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, llm-agents }:
     let
-      username = "kurichi";
-      hostname = "Kurichi-MacBook-Pro";
       system = "aarch64-darwin";
-      pkgs = nixpkgs.legacyPackages.${system};
+      pkgs = import nixpkgs { inherit system; config.allowUnfree = true; };
       llmPkgs = llm-agents.packages.${system};
       gwqPkg = pkgs.callPackage ./nix/packages/gwq.nix { };
+
+      mkProfile = name: hostFile:
+        let
+          base = {
+            profileName = name;
+            extraCasks = [];
+            extraMasApps = {};
+            extraPackages = [];
+            git = { email = null; signingKey = null; };
+          };
+          host = import hostFile { inherit pkgs; };
+        in
+          base // host // { profileName = name; git = base.git // (host.git or {}); };
+
+      mkDarwinSystem = name: hostFile:
+        let profile = mkProfile name hostFile;
+        in nix-darwin.lib.darwinSystem {
+          inherit system;
+          modules = [
+            ./nix/darwin.nix
+            home-manager.darwinModules.home-manager
+            {
+              home-manager.useGlobalPkgs = true;
+              home-manager.useUserPackages = true;
+              home-manager.backupFileExtension = "backup";
+              home-manager.extraSpecialArgs = { inherit llmPkgs gwqPkg profile; };
+              home-manager.users.${profile.username} = import ./nix/home.nix;
+            }
+          ];
+          specialArgs = { inherit inputs llmPkgs profile; };
+        };
     in
     {
-      darwinConfigurations.macos = nix-darwin.lib.darwinSystem {
-        inherit system;
-        modules = [
-          ./nix/darwin.nix
-          home-manager.darwinModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = { inherit llmPkgs gwqPkg; };
-            home-manager.users.${username} = import ./nix/home.nix;
-          }
-        ];
-        specialArgs = { inherit inputs username hostname llmPkgs; };
-      };
+      darwinConfigurations.personal = mkDarwinSystem "personal" ./nix/hosts/personal.nix;
+      darwinConfigurations.work     = mkDarwinSystem "work"     ./nix/hosts/work.nix;
     };
 }

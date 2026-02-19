@@ -1,11 +1,16 @@
-_: {
+{ lib, profile, ... }:
+let
+  useSigning = profile.git.signingKey != null;
+in
+{
   programs.git = {
     enable = true;
     lfs.enable = true;
+    userEmail = lib.mkIf (profile.git.email != null) profile.git.email;
     settings = {
       color.ui = "auto";
       commit = {
-        gpgsign = true;
+        gpgsign = useSigning;
         verbose = true;
       };
       core = {
@@ -28,6 +33,7 @@ _: {
       rerere.enabled = true;
       gpg = {
         format = "ssh";
+      } // lib.optionalAttrs (profile.passwordManager == "1password") {
         ssh.program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
       };
       url = {
@@ -35,7 +41,9 @@ _: {
           insteadOf = "https://github.com/";
         };
       };
-      user.signingkey = "~/.ssh/github.pub";
+      user = lib.optionalAttrs useSigning {
+        signingkey = profile.git.signingKey;
+      };
       ghq.root = "~/repos";
     };
     ignores = [

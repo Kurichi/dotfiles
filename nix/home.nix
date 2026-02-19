@@ -1,4 +1,4 @@
-{ config, pkgs, llmPkgs, weztermPkg, gwqPkg, ... }:
+{ config, pkgs, lib, llmPkgs, gwqPkg, profile, ... }:
 
 {
   imports = [
@@ -21,6 +21,8 @@
     GEMINI_CLI_HOME = "$HOME/.config";  # ~/.config/.gemini/ に設定保存
     # pnpm
     PNPM_HOME = "$HOME/.local/share/pnpm";
+  } // lib.optionalAttrs (profile.passwordManager == "bitwarden") {
+    SSH_AUTH_SOCK = "$HOME/.bitwarden-ssh-agent.sock";
   };
 
   # Let Home Manager manage itself
@@ -61,13 +63,6 @@
     llmPkgs.copilot-cli
     moreutils  # sponge コマンド（設定ファイルの in-place 更新用）
 
-    # AWS
-    awscli2
-    ssm-session-manager-plugin
-
-    # Infrastructure
-    terraform
-
     # Linters
     actionlint
     shellcheck
@@ -90,7 +85,7 @@
     nerd-fonts.hack
     nerd-fonts.intone-mono
     noto-fonts-cjk-sans
-  ];
+  ] ++ profile.extraPackages;
 
   # gwq config
   xdg.configFile."gwq/config.toml".text = ''
