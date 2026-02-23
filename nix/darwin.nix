@@ -21,7 +21,6 @@
       "adobe-acrobat-reader"
       "datagrip"
       "discord"
-      "doll"
       "google-drive"
       "homerow"
       "orbstack"

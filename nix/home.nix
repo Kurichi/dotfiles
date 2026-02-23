@@ -112,14 +112,6 @@
         KeepAlive = false;
       };
     };
-    doll = {
-      enable = true;
-      config = {
-        ProgramArguments = [ "/Applications/Doll.app/Contents/MacOS/Doll" ];
-        RunAtLoad = true;
-        KeepAlive = false;
-      };
-    };
     homerow = {
       enable = true;
       config = {
