@@ -120,5 +120,13 @@
         KeepAlive = false;
       };
     };
+    homerow = {
+      enable = true;
+      config = {
+        ProgramArguments = [ "/Applications/Homerow.app/Contents/MacOS/Homerow" ];
+        RunAtLoad = true;
+        KeepAlive = false;
+      };
+    };
   };
 }

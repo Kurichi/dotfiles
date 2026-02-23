@@ -23,6 +23,7 @@
       "discord"
       "doll"
       "google-drive"
+      "homerow"
       "orbstack"
       "postman-agent"
       "raycast"
