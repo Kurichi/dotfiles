@@ -55,7 +55,16 @@
     # pkgs."git-wt"  # TODO: nixpkgs更新後に戻す
 
     # AI tools
-    pkgs.claude-code
+    (pkgs.claude-code.overrideAttrs (old: {
+      postFixup = builtins.replaceStrings
+        [
+          "--set DISABLE_TELEMETRY 1"
+          "--set DISABLE_NON_ESSENTIAL_MODEL_CALLS 1"
+          "--set CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC 1"
+        ]
+        [ "" "" "" ]
+        old.postFixup;
+    }))
     llmPkgs.codex
     llmPkgs.gemini-cli
     llmPkgs.copilot-cli
