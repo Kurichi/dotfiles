@@ -55,7 +55,7 @@
     # pkgs."git-wt"  # TODO: nixpkgs更新後に戻す
 
     # AI tools
-    llmPkgs.claude-code
+    pkgs.claude-code
     llmPkgs.codex
     llmPkgs.gemini-cli
     llmPkgs.copilot-cli

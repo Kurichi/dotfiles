@@ -1,6 +1,15 @@
 {
   description = "Kurichi's dotfiles managed by nix-darwin and home-manager";
 
+  nixConfig = {
+    extra-substituters = [
+      "https://ryoppippi.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "ryoppippi.cachix.org-1:b2LbtWNvJeL/qb1B6TYOMK+apaCps4SCbzlPRfSQIms="
+    ];
+  };
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
@@ -18,9 +27,14 @@
       url = "github:numtide/llm-agents.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    claude-code-overlay = {
+      url = "github:ryoppippi/claude-code-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, llm-agents }:
+  outputs = inputs@{ self, nixpkgs, nix-darwin, home-manager, llm-agents, claude-code-overlay }:
     let
       username = "kurichi";
       hostname = "Kurichi-MacBook-Pro";
@@ -34,6 +48,7 @@
         inherit system;
         modules = [
           ./nix/darwin.nix
+          { nixpkgs.overlays = [ claude-code-overlay.overlays.default ]; }
           home-manager.darwinModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
