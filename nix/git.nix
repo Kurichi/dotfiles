@@ -5,7 +5,7 @@ _: {
     settings = {
       color.ui = "auto";
       commit = {
-        gpgsign = true;
+        gpgsign = false;
         verbose = true;
       };
       core = {
@@ -26,16 +26,11 @@ _: {
       pull.rebase = true;
       push.autoSetupRemote = true;
       rerere.enabled = true;
-      gpg = {
-        format = "ssh";
-        ssh.program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
-      };
       url = {
         "ssh://git@github.com/" = {
           insteadOf = "https://github.com/";
         };
       };
-      user.signingkey = "~/.ssh/github.pub";
       ghq.root = "~/repos";
     };
     ignores = [

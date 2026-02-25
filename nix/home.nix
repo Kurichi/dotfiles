@@ -19,8 +19,10 @@
     CODEX_HOME = "$HOME/.config/codex";
     CLAUDE_CONFIG_DIR = "$HOME/.config/claude";
     GEMINI_CLI_HOME = "$HOME/.config";  # ~/.config/.gemini/ に設定保存
+    ASDF_DATA_DIR = "$HOME/.local/share/asdf";
     # pnpm
     PNPM_HOME = "$HOME/.local/share/pnpm";
+    GOPRIVATE = "github.com/WinTicket";
   };
 
   # Let Home Manager manage itself
@@ -39,6 +41,7 @@
     just
     tree
     tmux
+    asdf-vm
 
     # Development
     nodejs
@@ -47,6 +50,8 @@
     uv
     go_1_26
     rustup
+    clang-tools
+    protobuf
 
     # Git tools
     gh
@@ -67,6 +72,7 @@
 
     # Infrastructure
     terraform
+    google-cloud-sdk
 
     # Linters
     actionlint

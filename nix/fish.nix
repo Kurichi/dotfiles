@@ -12,18 +12,32 @@
     enable = true;
     interactiveShellInit = ''
       set -g fish_greeting ""
-      # Add home-manager packages to PATH
-      fish_add_path --prepend ~/.local/state/home-manager/gcroots/current-home/home-path/bin
-      # nix-darwin
-      fish_add_path --append /run/current-system/sw/bin
-      # nix (Determinate)
-      fish_add_path --append /nix/var/nix/profiles/default/bin
+
       # Homebrew
       eval (/opt/homebrew/bin/brew shellenv)
+
+      # asdf (prefer ASDF_DATA_DIR, fallback to default ~/.asdf)
+      set -l asdf_shims ""
+      if set -q ASDF_DATA_DIR; and test -d "$ASDF_DATA_DIR/shims"
+        set asdf_shims "$ASDF_DATA_DIR/shims"
+      else if test -d ~/.asdf/shims
+        set asdf_shims ~/.asdf/shims
+      end
+      if test -n "$asdf_shims"
+        fish_add_path --prepend "$asdf_shims"
+      end
+
       # VSCode
       fish_add_path --append "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
       # pnpm
       fish_add_path --append $PNPM_HOME
+      # go (equivalent to: export PATH="$(go env GOPATH)/bin:$PATH")
+      if command -q go
+        set -l gopath_bin (go env GOPATH)/bin
+        if test -d "$gopath_bin"
+          fish_add_path --prepend "$gopath_bin"
+        end
+      end
 
       # Key bindings
       fish_hybrid_key_bindings
@@ -45,7 +59,7 @@
       kube = "kubectl";
       k8s = "kubectl";
       # nix
-      rebuild = "darwin-rebuild switch --flake ~/repos/dotfiles#macos";
+      rebuild = "darwin-rebuild switch --flake ~/repos/dotfiles#ca";
       # claude
       claude = "claude --allow-dangerously-skip-permissions";
     };

@@ -21,7 +21,6 @@
       "adobe-acrobat-reader"
       "datagrip"
       "discord"
-      "doll"
       "google-drive"
       "orbstack"
       "postman-agent"
@@ -29,11 +28,8 @@
       "slack"
       "steam"
       "wezterm@nightly"
-      "zoom"
+      "docker-desktop"
     ];
-    masApps = {
-      LINE = 539883307;
-    };
   };
 
   # Primary user (required for system.defaults options)
