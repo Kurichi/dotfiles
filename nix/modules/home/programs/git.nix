@@ -37,8 +37,12 @@ _: {
       };
       user.signingkey = "~/.ssh/github.pub";
       ghq.root = "~/repos";
+      wt = {
+        copyignored = true;
+      };
     };
     ignores = [
+      ".wt/"
       ".DS_Store"
       ".direnv/"
       ".env"

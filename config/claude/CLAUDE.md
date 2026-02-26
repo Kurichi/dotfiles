@@ -41,7 +41,7 @@
 - `./.github/PULL_REQUEST_TEMPLATE.md` が存在する場合，それを元にPRを作成してください．
 
 ### 作業ワークフロー
-- あなたは既に作業用 worktree 内で起動されていることを前提とする。worktree の作成・移動・削除（`gwq add`、`gwq cd`、`gwq remove` 等）は自分で行わないこと。
+- あなたは既に作業用 worktree 内で起動されていることを前提とする。worktree の作成・削除（`git wt <branch>`、`git wt -d <branch>` 等）は自分で行わないこと。
 - main ブランチのワークツリーに直接変更を加えないこと。**起動時のカレントディレクトリから `cd` で離れないこと。**（PreToolUse hook で linked worktree 上での cd/pushd/popd はブロックされる）
 - `codex exec` の実行は **Task ツール（SubAgent）経由** で行い、生の出力によるコンテキスト圧迫を防ぐこと。
 - 一連の作業が完了したら、code-review スキルを使用してレビューを依頼すること。

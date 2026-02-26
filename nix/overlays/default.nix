@@ -1,2 +1,1 @@
-final: prev:
-(import ./gwq.nix final prev)
+_final: _prev: { }

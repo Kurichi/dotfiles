@@ -36,7 +36,7 @@ nix/
 │   └── home/                 # ユーザー設定
 │       ├── default.nix       # imports集約
 │       ├── packages.nix      # パッケージ定義
-│       ├── dotfiles.nix      # 環境変数, gwq設定
+│       ├── dotfiles.nix      # 環境変数
 │       ├── launchd.nix       # 自動起動アプリ
 │       └── programs/         # プログラムごとのモジュール
 │           ├── default.nix   # imports集約
@@ -49,8 +49,7 @@ nix/
 │           ├── wezterm.nix   # WezTerm設定（config/weztermをリンク）
 │           └── llm-agents.nix # Claude Code/Gemini CLI設定
 └── overlays/
-    ├── default.nix           # overlay集約
-    └── gwq.nix               # カスタムGoパッケージ（overlay形式）
+    └── default.nix           # overlay集約（現在 no-op）
 ```
 
 ### アプリケーション設定の構造
@@ -77,7 +76,7 @@ config/
 ### パッケージ管理の階層
 
 1. **nixpkgs**: 大部分のCLIツール（`nix/modules/home/packages.nix`で定義）
-2. **overlays**: カスタムパッケージ（`nix/overlays/`で定義、gwq等）
+2. **overlays**: カスタムパッケージ（`nix/overlays/`で定義）
 3. **Homebrew casks**: Nixで提供されていないGUIアプリ（`nix/modules/darwin/homebrew.nix`）
 4. **Mac App Store**: masAppsで管理（`nix/modules/darwin/homebrew.nix`）
 5. **llm-agents flake**: Claude Code等のAIツール
@@ -91,7 +90,7 @@ config/
 あなたは既に作業用の git worktree 内で起動されていることを前提とする。worktree の作成・削除はユーザーが行う。
 
 - main ブランチのワークツリーに直接変更を加えないこと
-- worktree の作成（`gwq add`）、移動（`gwq cd`）、削除（`gwq remove`）は自分で行わないこと
+- worktree の作成（`git wt <branch>`）、削除（`git wt -d <branch>`）は自分で行わないこと
 - **起動時のカレントディレクトリから `cd` で離れないこと**（PreToolUse hook で main worktree への移動はブロックされる）
 
 ### ブランチ命名規則

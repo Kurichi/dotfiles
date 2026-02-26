@@ -5,7 +5,7 @@
   xdg.configFile = {
     "fish/functions/dev.fish".source = ../../../../config/fish/functions/dev.fish;
     "fish/functions/ghq-fzf.fish".source = ../../../../config/fish/functions/ghq-fzf.fish;
-    "fish/functions/gwq-fzf.fish".source = ../../../../config/fish/functions/gwq-fzf.fish;
+    "fish/functions/wt-fzf.fish".source = ../../../../config/fish/functions/wt-fzf.fish;
   };
 
   programs.fish = {
@@ -24,6 +24,9 @@
       fish_add_path --append "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
       # pnpm
       fish_add_path --append $PNPM_HOME
+
+      # git-wt shell integration (completions + auto-cd wrapper)
+      git-wt --init fish | source
 
       # Key bindings
       fish_hybrid_key_bindings

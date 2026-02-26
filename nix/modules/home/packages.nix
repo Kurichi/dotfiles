@@ -25,8 +25,7 @@
     # Git tools
     gh
     lazygit
-    gwq
-    # pkgs."git-wt"  # TODO: nixpkgs更新後に戻す
+    git-wt
 
     # AI tools
     (pkgs.claude-code.overrideAttrs (old: {
