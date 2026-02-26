@@ -42,15 +42,24 @@ telescope.setup({
       require("telescope.themes").get_dropdown({}),
     },
     file_browser = {},
+    live_grep_args = {
+      auto_quoting = true,
+      mappings = {
+        i = {
+          ["<C-g>"] = require("telescope-live-grep-args.actions").quote_prompt(),
+        },
+      },
+    },
   },
 })
 telescope.load_extension("fzf")
 telescope.load_extension("ui-select")
 telescope.load_extension("file_browser")
+telescope.load_extension("live_grep_args")
 
 local builtin = require("telescope.builtin")
 vim.keymap.set("n", "<leader>ff", builtin.find_files)
-vim.keymap.set("n", "<leader>fg", builtin.live_grep)
+vim.keymap.set("n", "<leader>fg", telescope.extensions.live_grep_args.live_grep_args)
 vim.keymap.set("n", "<leader>fb", builtin.buffers)
 vim.keymap.set("n", "<leader>fd", builtin.diagnostics)
 vim.keymap.set("n", "<leader>fs", builtin.treesitter)
