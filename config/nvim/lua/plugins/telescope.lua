@@ -8,6 +8,7 @@ return {
   { "nvim-tree/nvim-web-devicons", lazy = true },
   { "nvim-lua/plenary.nvim", lazy = true },
   { "nvim-telescope/telescope-file-browser.nvim", lazy = true },
+  { "nvim-telescope/telescope-live-grep-args.nvim", lazy = true },
   {
     "nvim-telescope/telescope.nvim",
     cmd = "Telescope",
