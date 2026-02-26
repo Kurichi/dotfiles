@@ -33,8 +33,8 @@
   # NeoVim config files
   # lazy-lock.json は書き込みが必要なので Nix 管理外
   xdg.configFile = {
-    "nvim/init.lua".source = ../config/nvim/init.lua;
-    "nvim/lua".source = ../config/nvim/lua;
-    "nvim/spell".source = ../config/nvim/spell;
+    "nvim/init.lua".source = ../../../../config/nvim/init.lua;
+    "nvim/lua".source = ../../../../config/nvim/lua;
+    "nvim/spell".source = ../../../../config/nvim/spell;
   };
 }
