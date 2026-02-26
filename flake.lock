@@ -29,17 +29,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1771188132,
-        "narHash": "sha256-qLXxN/tPrZtnekaLBQuVtxQfvqqs5cT5WbyH4zZaTGI=",
-        "ref": "refs/heads/master",
-        "rev": "ae8003d8b61d0d373e7ca3da1a48f9c870d15df9",
-        "revCount": 6241,
-        "type": "git",
-        "url": "ssh://git@github.com/nix-community/home-manager"
+        "lastModified": 1772060133,
+        "narHash": "sha256-VuyRptb8v1lVGMlLp4/1vRX3Efwec0CN0S6mKmDPzLg=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "ce9b6e52500a0ea0ec48f0bbf6d7a3e431d9dfa4",
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/nix-community/home-manager"
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "type": "github"
       }
     },
     "llm-agents": {
@@ -51,17 +51,17 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1771988864,
-        "narHash": "sha256-Zc0kPK7nu+bThM5En5ZbLXhROU5DM6sj6rLdJ2wyaRA=",
-        "ref": "refs/heads/main",
-        "rev": "378270d796a9380ba72cf4ba0997d2c40a21d42f",
-        "revCount": 4832,
-        "type": "git",
-        "url": "ssh://git@github.com/numtide/llm-agents.nix"
+        "lastModified": 1772040231,
+        "narHash": "sha256-9rtEO+VPPLYLiTMYbXShZA5OCKlyU1KfouefrdDwl3w=",
+        "owner": "numtide",
+        "repo": "llm-agents.nix",
+        "rev": "5611434a34e8d36b20e6653ce161e1565d5fda3d",
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/numtide/llm-agents.nix"
+        "owner": "numtide",
+        "repo": "llm-agents.nix",
+        "type": "github"
       }
     },
     "nix-darwin": {
@@ -71,33 +71,33 @@
         ]
       },
       "locked": {
-        "lastModified": 1770922915,
-        "narHash": "sha256-6J/JoK9iL7sHvKJcGW2KId2agaKv1OGypsa7kN+ZBD4=",
-        "ref": "refs/heads/master",
-        "rev": "6c5a56295d2a24e43bcd8af838def1b9a95746b2",
-        "revCount": 2329,
-        "type": "git",
-        "url": "ssh://git@github.com/LnL7/nix-darwin"
+        "lastModified": 1771992996,
+        "narHash": "sha256-Y/ijH/unOPxzUicbla6yT/14RJgubUWnY2I2A6Ast2Q=",
+        "owner": "LnL7",
+        "repo": "nix-darwin",
+        "rev": "3bfa436c1975674ca465ce34586467be301ff509",
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/LnL7/nix-darwin"
+        "owner": "LnL7",
+        "repo": "nix-darwin",
+        "type": "github"
       }
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1771147098,
-        "narHash": "sha256-jpfPdBjKO232s5NueoNEvvVzpndiUzPLNYcH4/Ov0gY=",
-        "ref": "nixpkgs-unstable",
-        "rev": "e3cb16bccd9facebae3ba29c6a76a4cc1b73462a",
-        "revCount": 946663,
-        "type": "git",
-        "url": "ssh://git@github.com/NixOS/nixpkgs"
+        "lastModified": 1771923393,
+        "narHash": "sha256-Fy0+UXELv9hOE8WjYhJt8fMDLYTU2Dqn3cX4BwoGBos=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "ea7f1f06811ce7fcc81d6c6fd4213150c23edcf2",
+        "type": "github"
       },
       "original": {
+        "owner": "NixOS",
         "ref": "nixpkgs-unstable",
-        "type": "git",
-        "url": "ssh://git@github.com/NixOS/nixpkgs"
+        "repo": "nixpkgs",
+        "type": "github"
       }
     },
     "root": {

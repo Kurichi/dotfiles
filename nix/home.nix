@@ -1,4 +1,4 @@
-{ config, pkgs, llmPkgs, weztermPkg, gwqPkg, ... }:
+{ config, pkgs, llmPkgs, gwqPkg, ... }:
 
 {
   imports = [
@@ -62,7 +62,7 @@
     # AI tools
     llmPkgs.claude-code
     llmPkgs.codex
-    llmPkgs.gemini-cli
+    # llmPkgs.gemini-cli  # TODO: node-pty が Node.js v24 でビルド失敗するため一時無効化
     llmPkgs.copilot-cli
     moreutils  # sponge コマンド（設定ファイルの in-place 更新用）
 

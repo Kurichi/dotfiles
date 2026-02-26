@@ -2,20 +2,20 @@
   description = "Kurichi's dotfiles managed by nix-darwin and home-manager";
 
   inputs = {
-    nixpkgs.url = "git+ssh://git@github.com/NixOS/nixpkgs?ref=nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
     nix-darwin = {
-      url = "git+ssh://git@github.com/LnL7/nix-darwin";
+      url = "github:LnL7/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     home-manager = {
-      url = "git+ssh://git@github.com/nix-community/home-manager";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
     llm-agents = {
-      url = "git+ssh://git@github.com/numtide/llm-agents.nix";
+      url = "github:numtide/llm-agents.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
