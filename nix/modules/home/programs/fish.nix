@@ -6,6 +6,7 @@
     "fish/functions/dev.fish".source = ../../../../config/fish/functions/dev.fish;
     "fish/functions/ghq-fzf.fish".source = ../../../../config/fish/functions/ghq-fzf.fish;
     "fish/functions/wt-fzf.fish".source = ../../../../config/fish/functions/wt-fzf.fish;
+    "fish/functions/cw.fish".source = ../../../../config/fish/functions/cw.fish;
   };
 
   programs.fish = {
