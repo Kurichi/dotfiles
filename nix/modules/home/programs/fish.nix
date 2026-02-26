@@ -1,11 +1,11 @@
-{ pkgs, ... }:
+{ ... }:
 
 {
   # Fish functions from external files
   xdg.configFile = {
-    "fish/functions/dev.fish".source = ../config/fish/functions/dev.fish;
-    "fish/functions/ghq-fzf.fish".source = ../config/fish/functions/ghq-fzf.fish;
-    "fish/functions/gwq-fzf.fish".source = ../config/fish/functions/gwq-fzf.fish;
+    "fish/functions/dev.fish".source = ../../../../config/fish/functions/dev.fish;
+    "fish/functions/ghq-fzf.fish".source = ../../../../config/fish/functions/ghq-fzf.fish;
+    "fish/functions/gwq-fzf.fish".source = ../../../../config/fish/functions/gwq-fzf.fish;
   };
 
   programs.fish = {
@@ -116,17 +116,5 @@
         echo -n $hostcolor'─'$white$__fish_prompt_char $normal
       '';
     };
-  };
-
-  # fzf
-  programs.fzf = {
-    enable = true;
-    enableFishIntegration = true;
-  };
-
-  # direnv
-  programs.direnv = {
-    enable = true;
-    nix-direnv.enable = true;
   };
 }

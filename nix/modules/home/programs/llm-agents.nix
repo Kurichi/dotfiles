@@ -30,18 +30,18 @@ let
 in
 {
   # Claude Code configuration
-  home.file.".config/claude/CLAUDE.md".source = ../config/claude/CLAUDE.md;
-  home.file.".config/claude/skills".source = ../config/claude/skills;
-  home.file.".config/claude/hooks".source = ../config/claude/hooks;
+  home.file.".config/claude/CLAUDE.md".source = ../../../../config/claude/CLAUDE.md;
+  home.file.".config/claude/skills".source = ../../../../config/claude/skills;
+  home.file.".config/claude/hooks".source = ../../../../config/claude/hooks;
 
   # Gemini CLI configuration
-  home.file.".config/.gemini/GEMINI.md".source = ../config/gemini/GEMINI.md;
+  home.file.".config/.gemini/GEMINI.md".source = ../../../../config/gemini/GEMINI.md;
 
   # Activation script: Nix管理設定と既存設定をスマートマージ
   home.activation.mergeLlmAgentConfigs = lib.hm.dag.entryAfter ["writeBoundary"] ''
     # Claude Code settings.json マージ
     CLAUDE_SETTINGS="$HOME/.config/claude/settings.json"
-    CLAUDE_NIX_SETTINGS="${../config/claude/settings.json}"
+    CLAUDE_NIX_SETTINGS="${../../../../config/claude/settings.json}"
     if [ -f "$CLAUDE_SETTINGS" ]; then
       # スマートマージ: 配列は結合、オブジェクトはNix優先
       run ${pkgs.jq}/bin/jq -s -f ${claudeMergeScript} "$CLAUDE_SETTINGS" "$CLAUDE_NIX_SETTINGS" | \
@@ -52,7 +52,7 @@ in
 
     # Gemini CLI settings.json マージ（シンプルマージ）
     GEMINI_SETTINGS="$HOME/.config/.gemini/settings.json"
-    GEMINI_NIX_SETTINGS="${../config/gemini/settings.json}"
+    GEMINI_NIX_SETTINGS="${../../../../config/gemini/settings.json}"
     run mkdir -p "$(dirname "$GEMINI_SETTINGS")"
     if [ -f "$GEMINI_SETTINGS" ]; then
       # 既存設定に Nix 設定をマージ（Nix優先、既存の認証情報は保持）

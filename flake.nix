@@ -41,24 +41,50 @@
       system = "aarch64-darwin";
       pkgs = nixpkgs.legacyPackages.${system};
       llmPkgs = llm-agents.packages.${system};
-      gwqPkg = pkgs.callPackage ./nix/packages/gwq.nix { };
     in
     {
       darwinConfigurations.macos = nix-darwin.lib.darwinSystem {
         inherit system;
         modules = [
-          ./nix/darwin.nix
-          { nixpkgs.overlays = [ claude-code-overlay.overlays.default ]; }
+          ./nix/modules/darwin
+          {
+            nixpkgs.overlays = [
+              claude-code-overlay.overlays.default
+              (import ./nix/overlays/default.nix)
+            ];
+          }
           home-manager.darwinModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.backupFileExtension = "backup";
-            home-manager.extraSpecialArgs = { inherit llmPkgs gwqPkg; };
-            home-manager.users.${username} = import ./nix/home.nix;
+            home-manager.extraSpecialArgs = { inherit llmPkgs; };
+            home-manager.users.${username} = import ./nix/modules/home;
           }
         ];
         specialArgs = { inherit inputs username hostname llmPkgs; };
+      };
+
+      # Convenience apps
+      apps.${system} = {
+        switch = {
+          type = "app";
+          program = toString (pkgs.writeShellScript "switch" ''
+            sudo darwin-rebuild switch --flake ${self}#macos
+          '');
+        };
+        build = {
+          type = "app";
+          program = toString (pkgs.writeShellScript "build" ''
+            darwin-rebuild build --flake ${self}#macos
+          '');
+        };
+        update = {
+          type = "app";
+          program = toString (pkgs.writeShellScript "update" ''
+            nix flake update
+          '');
+        };
       };
     };
 }
