@@ -12,8 +12,12 @@
 
   homebrew = {
     casks = [
+      "adobe-acrobat-reader"
       "discord"
       "google-drive"
+      "orbstack"
+      "postman-agent"
+      "slack"
       "steam"
     ];
     masApps = {
@@ -21,5 +25,9 @@
     };
   };
 
-  packages = p: with p; [];
+  packages = p: with p; [
+    opensc
+    tailscale
+    valkey
+  ];
 }

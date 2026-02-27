@@ -47,6 +47,9 @@
     actionlint
     shellcheck
 
+    # Infrastructure
+    terraform
+
     # Build tools
     ninja
 

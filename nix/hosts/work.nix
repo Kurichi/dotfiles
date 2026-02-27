@@ -11,8 +11,6 @@
   homebrew = {
     casks = [
       "datagrip"
-      "postman-agent"
-      "slack"
       "zoom"
     ];
     masApps = {};
@@ -21,10 +19,5 @@
   packages = p: with p; [
     awscli2
     ssm-session-manager-plugin
-    terraform
-    tailscale
-    valkey
-    xcode-install
-    opensc
   ];
 }
