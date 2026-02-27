@@ -1,15 +1,6 @@
 {
   description = "Kurichi's dotfiles managed by nix-darwin and home-manager";
 
-  nixConfig = {
-    extra-substituters = [
-      "https://ryoppippi.cachix.org"
-    ];
-    extra-trusted-public-keys = [
-      "ryoppippi.cachix.org-1:b2LbtWNvJeL/qb1B6TYOMK+apaCps4SCbzlPRfSQIms="
-    ];
-  };
-
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
 
