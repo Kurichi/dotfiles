@@ -1,4 +1,4 @@
-{ pkgs, llmPkgs, ... }:
+{ pkgs, llmPkgs, profile, ... }:
 
 {
   home.packages = with pkgs; [
@@ -41,36 +41,24 @@
     llmPkgs.codex
     llmPkgs.gemini-cli
     llmPkgs.copilot-cli
-    moreutils  # sponge コマンド（設定ファイルの in-place 更新用）
-
-    # AWS
-    awscli2
-    ssm-session-manager-plugin
-
-    # Infrastructure
-    terraform
+    moreutils
 
     # Linters
     actionlint
     shellcheck
 
+    # Infrastructure
+    terraform
+
     # Build tools
     ninja
 
     # PDF tools
-    pkgs."poppler-utils"  # pdftotext, pdftoppm 等
-
-    # Tools
-    tailscale
-    valkey
-    xcode-install
-    opensc
-
-    # GUI Apps: Homebrew casksで管理（darwin/homebrew.nix参照）
+    pkgs."poppler-utils"
 
     # Fonts
     nerd-fonts.hack
     nerd-fonts.intone-mono
     noto-fonts-cjk-sans
-  ];
+  ] ++ ((profile.packages or (_: [])) pkgs);
 }

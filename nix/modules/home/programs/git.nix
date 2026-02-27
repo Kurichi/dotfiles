@@ -1,11 +1,14 @@
-_: {
+{ profile, username, ... }:
+{
   programs.git = {
     enable = true;
     lfs.enable = true;
+    userName = profile.git.userName;
+    userEmail = profile.git.userEmail;
     settings = {
       color.ui = "auto";
       commit = {
-        gpgsign = true;
+        gpgsign = profile.git.gpgSign or true;
         verbose = true;
       };
       core = {
@@ -28,18 +31,16 @@ _: {
       rerere.enabled = true;
       gpg = {
         format = "ssh";
-        ssh.program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
+        ssh.program = profile.git.gpgSignProgram or "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
       };
       url = {
         "ssh://git@github.com/" = {
           insteadOf = "https://github.com/";
         };
       };
-      user.signingkey = "~/.ssh/github.pub";
+      user.signingkey = profile.git.signingKey or "/Users/${username}/.ssh/github.pub";
       ghq.root = "~/repos";
-      wt = {
-        copyignored = true;
-      };
+      wt.copyignored = true;
     };
     ignores = [
       ".wt/"

@@ -1,30 +1,48 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, username, ... }:
 
 let
-  # Claude Code 設定マージ用 jq スクリプト
-  claudeMergeScript = pkgs.writeText "claude-merge.jq" ''
-    # 既存設定（$existing）と Nix 設定（$nix）をスマートマージ
-    # - 配列: 既存 + Nix（重複除去）
-    # - オブジェクト: Nix が優先だが、既存のキーも保持
-    # - permissions.allow/deny: 配列マージ
+  claudeNixSettings = pkgs.writeText "claude-nix-settings.json" (builtins.toJSON {
+    trustedDirectories = [ "/Users/${username}/repos" ];
+    respectGitignore = false;
+    cleanupPeriodDays = 90;
+    env = {
+      EDITOR = "nvim";
+      CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+    };
+    permissions = {
+      allow = [
+        "Bash(fd:*)" "Bash(rg:*)" "Bash(eza:*)"
+        "mcp__gopls__*" "mcp__deepwiki__*" "WebSearch"
+      ];
+      deny = [ "Bash(git reset --hard:*)" ];
+      defaultMode = "plan";
+    };
+    model = "opus";
+    hooks = {
+      PreToolUse = [{ matcher = "Bash"; hooks = [{ type = "command"; command = "$HOME/.config/claude/hooks/guard-worktree.sh"; }]; }];
+      Notification = [{ hooks = [{ type = "command"; command = "afplay /System/Library/Sounds/Glass.aiff"; }]; }];
+      Stop = [{ hooks = [{ type = "command"; command = "afplay /System/Library/Sounds/Funk.aiff"; }]; }];
+    };
+    statusLine = { type = "command"; command = "bunx -y ccstatusline@latest"; padding = 0; };
+    outputStyle = "Explanatory";
+    language = "Japanese";
+    spinnerVerbs = {
+      mode = "replace";
+      verbs = [ "うーむ" "う〜〜〜む" "脳みそフル回転中" "考え中" "うるとらしんきんぐ" "頭がオーバーヒート" ];
+    };
+  });
 
+  claudeMergeScript = pkgs.writeText "claude-merge.jq" ''
     def merge_arrays: (.[0] + .[1]) | unique;
 
-    # ベースは既存設定
     .[0] as $existing |
     .[1] as $nix |
 
-    # 既存設定をベースに Nix 設定をマージ
     $existing * $nix |
 
-    # permissions は配列マージ（既存 + Nix）
     .permissions.allow = ([$existing.permissions.allow // [], $nix.permissions.allow // []] | merge_arrays) |
     .permissions.deny = ([$existing.permissions.deny // [], $nix.permissions.deny // []] | merge_arrays) |
-
-    # trustedDirectories は配列マージ（既存 + Nix）
     .trustedDirectories = ([$existing.trustedDirectories // [], $nix.trustedDirectories // []] | merge_arrays) |
-
-    # enabledPlugins は既存を保持（TODO: 将来的に Nix 管理）
     .enabledPlugins = ($existing.enabledPlugins // {})
   '';
 in
@@ -37,31 +55,34 @@ in
   # Gemini CLI configuration
   home.file.".config/.gemini/GEMINI.md".source = ../../../../config/gemini/GEMINI.md;
 
-  # Activation script: Nix管理設定と既存設定をスマートマージ
+  # Activation script: merge Nix-managed settings with existing settings
   home.activation.mergeLlmAgentConfigs = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    # Claude Code settings.json マージ
+    # Claude Code settings.json merge (temp file + mv for atomic update)
     CLAUDE_SETTINGS="$HOME/.config/claude/settings.json"
-    CLAUDE_NIX_SETTINGS="${../../../../config/claude/settings.json}"
+    CLAUDE_NIX_SETTINGS="${claudeNixSettings}"
+    run mkdir -p "$(dirname "$CLAUDE_SETTINGS")"
     if [ -f "$CLAUDE_SETTINGS" ]; then
-      # スマートマージ: 配列は結合、オブジェクトはNix優先
-      run ${pkgs.jq}/bin/jq -s -f ${claudeMergeScript} "$CLAUDE_SETTINGS" "$CLAUDE_NIX_SETTINGS" | \
-        run ${pkgs.moreutils}/bin/sponge "$CLAUDE_SETTINGS"
+      run chmod u+w "$CLAUDE_SETTINGS"
+      CLAUDE_TMP="$(mktemp)"
+      run ${pkgs.jq}/bin/jq -s -f ${claudeMergeScript} "$CLAUDE_SETTINGS" "$CLAUDE_NIX_SETTINGS" > "$CLAUDE_TMP"
+      run mv "$CLAUDE_TMP" "$CLAUDE_SETTINGS"
     else
       run cp "$CLAUDE_NIX_SETTINGS" "$CLAUDE_SETTINGS"
     fi
+    run chmod u+w "$CLAUDE_SETTINGS"
 
-    # Gemini CLI settings.json マージ（シンプルマージ）
+    # Gemini CLI settings.json merge
     GEMINI_SETTINGS="$HOME/.config/.gemini/settings.json"
     GEMINI_NIX_SETTINGS="${../../../../config/gemini/settings.json}"
     run mkdir -p "$(dirname "$GEMINI_SETTINGS")"
     if [ -f "$GEMINI_SETTINGS" ]; then
-      # 既存設定に Nix 設定をマージ（Nix優先、既存の認証情報は保持）
       run chmod u+w "$GEMINI_SETTINGS"
-      run ${pkgs.jq}/bin/jq -s '.[0] * .[1]' "$GEMINI_SETTINGS" "$GEMINI_NIX_SETTINGS" | \
-        run ${pkgs.moreutils}/bin/sponge "$GEMINI_SETTINGS"
+      GEMINI_TMP="$(mktemp)"
+      run ${pkgs.jq}/bin/jq -s '.[0] * .[1]' "$GEMINI_SETTINGS" "$GEMINI_NIX_SETTINGS" > "$GEMINI_TMP"
+      run mv "$GEMINI_TMP" "$GEMINI_SETTINGS"
     else
       run cp "$GEMINI_NIX_SETTINGS" "$GEMINI_SETTINGS"
-      run chmod u+w "$GEMINI_SETTINGS"
     fi
+    run chmod u+w "$GEMINI_SETTINGS"
   '';
 }
