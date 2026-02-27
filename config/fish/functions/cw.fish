@@ -25,11 +25,11 @@ function cw --description "Create worktree and launch Claude Code"
         end
     end
 
-    # ブランチの存在チェックで gwq add のフラグを決定（ローカル + リモート）
+    # ブランチの存在チェックで git wt add のフラグを決定（ローカル + リモート）
     if git branch --list "$branch" | string match -qr '\S'; or git branch -r --list "origin/$branch" | string match -qr '\S'
-        gwq add "$branch"; or return 1
+        git wt add "$branch"; or return 1
     else
-        gwq add -b "$branch"; or return 1
+        git wt add -b "$branch"; or return 1
     end
 
     # worktree パスを取得して移動
