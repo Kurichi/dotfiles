@@ -11,7 +11,6 @@
   homebrew = {
     casks = [
       "datagrip"
-      "zoom"
     ];
     masApps = {};
   };

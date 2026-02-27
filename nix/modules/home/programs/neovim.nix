@@ -12,7 +12,7 @@
       gopls
       lua-language-server
       llvmPackages.clang-tools # clangd
-      dockerfile-language-server-nodejs
+      dockerfile-language-server
       docker-compose-language-service
       vscode-langservers-extracted # html, json, css
       marksman

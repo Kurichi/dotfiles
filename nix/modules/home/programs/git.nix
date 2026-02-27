@@ -3,9 +3,9 @@
   programs.git = {
     enable = true;
     lfs.enable = true;
-    userName = profile.git.userName;
-    userEmail = profile.git.userEmail;
     settings = {
+      user.name = profile.git.userName;
+      user.email = profile.git.userEmail;
       color.ui = "auto";
       commit = {
         gpgsign = profile.git.gpgSign or true;
