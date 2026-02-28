@@ -19,6 +19,7 @@
       "postman-agent"
       "slack"
       "steam"
+      "zoom"
     ];
     masApps = {
       LINE = 539883307;
