@@ -25,18 +25,40 @@ function cw --description "Create worktree and launch Claude Code"
         end
     end
 
-    # ブランチの存在チェックで gwq add のフラグを決定（ローカル + リモート）
-    if git branch --list "$branch" | string match -qr '\S'; or git branch -r --list "origin/$branch" | string match -qr '\S'
-        gwq add "$branch"; or return 1
-    else
-        gwq add -b "$branch"; or return 1
+    # スラッグ生成（/ → - に置換してフラットなディレクトリ名にする）
+    set -l slug (string replace -a '/' '-' $branch)
+    set -l repo_root (git rev-parse --show-toplevel)
+    set -l wt_path "$repo_root/.wt/$slug"
+
+    # 既存 worktree が同ブランチに存在する場合は再作成せず移動のみ
+    if git worktree list | string match -q "*[$branch]*"
+        cd $wt_path
+        and claude --allow-dangerously-skip-permissions
+        return
     end
 
-    # worktree パスを取得して移動
-    set -l wt_path (git worktree list | grep -F "[$branch]" | awk '{print $1}')
-    if test -z "$wt_path"
-        echo "Failed to find worktree path for $branch"
-        return 1
+    # ワークツリー作成（ブランチ存在有無で分岐）
+    mkdir -p "$repo_root/.wt"
+    if git branch --list "$branch" | string match -qr '\S'
+        # ローカルブランチが既に存在する
+        git worktree add "$wt_path" "$branch"; or return 1
+    else if git branch -r --list "origin/$branch" | string match -qr '\S'
+        # リモートにのみ存在する → ローカルブランチを追跡付きで作成
+        git worktree add "$wt_path" "$branch"; or return 1
+    else
+        # 新規ブランチ
+        git worktree add -b "$branch" "$wt_path"; or return 1
+    end
+
+    # copyignored: .gitignore で無視されているがトラッキング外のファイルをコピー
+    set -l ignored_files (git ls-files --ignored --exclude-standard --others)
+    for f in $ignored_files
+        set -l src "$repo_root/$f"
+        set -l dst "$wt_path/$f"
+        if test -f "$src"
+            mkdir -p (dirname "$dst")
+            cp "$src" "$dst"
+        end
     end
 
     cd $wt_path
