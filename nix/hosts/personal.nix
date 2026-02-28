@@ -13,10 +13,17 @@
   homebrew = {
     casks = [
       "adobe-acrobat-reader"
+      "alt-tab"
+      "claude"
+      "codex"
       "discord"
+      "google-chrome"
       "google-drive"
+      "notion"
+      "onedrive"
       "orbstack"
       "postman-agent"
+      "proton-mail"
       "slack"
       "steam"
       "zoom"
