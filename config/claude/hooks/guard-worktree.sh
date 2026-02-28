@@ -35,7 +35,10 @@ HOOKJSON
 fi
 
 # === main worktree パスへの参照もブロック（git -C <main> 等） ===
-if echo "$COMMAND" | grep -qF "$MAIN_WORKTREE"; then
+# .wt/ がメインリポジトリ内にある場合、linked worktree パスが main パスの
+# プレフィックスを含むため誤検知する。現在の worktree パスを先に除去してからチェック。
+COMMAND_STRIPPED="${COMMAND//"$WORKTREE_ROOT"/__CURRENT_WT__}"
+if echo "$COMMAND_STRIPPED" | grep -qF "$MAIN_WORKTREE"; then
   cat <<HOOKJSON
 {
   "hookSpecificOutput": {

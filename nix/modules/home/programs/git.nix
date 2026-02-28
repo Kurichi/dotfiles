@@ -40,7 +40,10 @@
       };
       user.signingkey = profile.git.signingKey or "/Users/${username}/.ssh/github.pub";
       ghq.root = "~/repos";
-      wt.copyignored = true;
+      wt = {
+        basedir = ".wt";
+        copyignored = true;
+      };
     };
     ignores = [
       ".wt/"
