@@ -49,6 +49,7 @@
 
     # Infrastructure
     terraform
+    google-cloud-sdk
 
     # Build tools
     ninja
