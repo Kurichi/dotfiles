@@ -1,0 +1,38 @@
+return {
+  "Kurichi/review.nvim",
+  dev = true,
+  cmd = {
+    "ReviewStart",
+    "ReviewEnd",
+    "ReviewResume",
+    "ReviewList",
+    "ReviewExport",
+    "ReviewMark",
+    "ReviewUnmark",
+    "ReviewStatus",
+  },
+  keys = {
+    { "<leader>Rc", desc = "Add review comment" },
+    { "<leader>Rr", desc = "Resolve comment" },
+    { "<leader>Rw", desc = "Wontfix comment" },
+    { "<leader>Rd", desc = "Delete comment" },
+    { "]r",         desc = "Next open comment" },
+    { "[r",         desc = "Previous open comment" },
+    { "<leader>Rl", desc = "List comments" },
+    { "<leader>Rm", desc = "Mark file reviewed" },
+    { "<leader>Rt", desc = "Toggle resolved" },
+  },
+  opts = {
+    keymaps = {
+      add_comment = "<leader>Rc",
+      resolve = "<leader>Rr",
+      wontfix = "<leader>Rw",
+      delete = "<leader>Rd",
+      next_comment = "]r",
+      prev_comment = "[r",
+      list_comments = "<leader>Rl",
+      mark_file = "<leader>Rm",
+      toggle_resolved = "<leader>Rt",
+    },
+  },
+}

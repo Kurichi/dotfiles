@@ -15,6 +15,9 @@ local opts = {
   defaults = {
     lazy = true,
   },
+  dev = {
+    path = "~/repos/github.com/Kurichi",
+  },
   performance = {
     cache = {
       enabled = true,
