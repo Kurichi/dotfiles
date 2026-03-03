@@ -7,6 +7,9 @@
       cleanup = "zap";
     };
     caskArgs.appdir = "/Applications";
+    brews = [
+      "asdf"
+    ];
     casks = [
       "1password"
       "homerow"
