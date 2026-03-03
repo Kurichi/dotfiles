@@ -31,8 +31,9 @@
       rerere.enabled = true;
       gpg = {
         format = "ssh";
-        ssh.program = profile.git.gpgSignProgram or "/Applications/1Password.app/Contents/MacOS/op-ssh-sign";
-      };
+      } // (if profile.git ? gpgSignProgram then {
+        ssh.program = profile.git.gpgSignProgram;
+      } else {});
       url = {
         "ssh://git@github.com/" = {
           insteadOf = "https://github.com/";
