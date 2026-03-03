@@ -5,8 +5,11 @@
   git = {
     userName = "Yuya Kurihara";
     userEmail = "kurihara_yuya@cyberagent.co.jp";
-    gpgSign = false;
+    signingKey = "/Users/s30264/.ssh/id_ed25519.pub";
+    gpgSign = true;
   };
+
+  sshAuthSock = "/Users/s30264/.bitwarden-ssh-agent.sock";
 
   homebrew = {
     casks = [

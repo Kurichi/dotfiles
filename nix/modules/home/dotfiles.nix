@@ -1,4 +1,5 @@
-_: {
+{ profile, ... }:
+{
   # Environment variables
   home.sessionVariables = {
     # AI Tools
@@ -7,5 +8,7 @@ _: {
     GEMINI_CLI_HOME = "$HOME/.config";  # ~/.config/.gemini/ に設定保存
     # pnpm
     PNPM_HOME = "$HOME/.local/share/pnpm";
-  };
+  } // (if profile ? sshAuthSock then {
+    SSH_AUTH_SOCK = profile.sshAuthSock;
+  } else {});
 }
