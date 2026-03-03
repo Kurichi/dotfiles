@@ -10,6 +10,7 @@
 
   homebrew = {
     casks = [
+      "bitwarden"
       "datagrip"
     ];
     masApps = {};
