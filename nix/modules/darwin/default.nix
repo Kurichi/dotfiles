@@ -17,6 +17,9 @@
     extra-trusted-public-keys = ryoppippi.cachix.org-1:b2LbtWNvJeL/qb1B6TYOMK+apaCps4SCbzlPRfSQIms=
   '';
 
+  # Enable Fish shell system-wide (/etc/shells registration + completions)
+  programs.fish.enable = true;
+
   # System packages (CLIツールはhome/packages.nixで管理)
   environment.systemPackages = [];
 

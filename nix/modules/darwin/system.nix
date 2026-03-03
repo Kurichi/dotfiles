@@ -1,4 +1,4 @@
-{ username, hostname, ... }:
+{ username, hostname, pkgs, ... }:
 
 {
   # Primary user (required for system.defaults options)
@@ -38,6 +38,7 @@
   users.users.${username} = {
     name = username;
     home = "/Users/${username}";
+    shell = pkgs.fish;
   };
 
   # Enable sudo with Touch ID (new syntax)
