@@ -13,18 +13,20 @@
     enable = true;
     interactiveShellInit = ''
       set -g fish_greeting ""
-      # Add home-manager packages to PATH
-      fish_add_path --prepend ~/.local/state/home-manager/gcroots/current-home/home-path/bin
       # nix-darwin
       fish_add_path --append /run/current-system/sw/bin
       # nix (Determinate)
       fish_add_path --append /nix/var/nix/profiles/default/bin
       # Homebrew
       eval (/opt/homebrew/bin/brew shellenv)
+      # asdf version manager
+      source /opt/homebrew/opt/asdf/libexec/asdf.fish
       # VSCode
       fish_add_path --append "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
       # pnpm
       fish_add_path --append $PNPM_HOME
+      # Add home-manager packages to PATH (after asdf to ensure priority over shims)
+      fish_add_path --path --move --prepend ~/.local/state/home-manager/gcroots/current-home/home-path/bin
 
       # git-wt shell integration (completions + auto-cd wrapper)
       git-wt --init fish | source
