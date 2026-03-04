@@ -10,7 +10,6 @@
     fzf
     ghq
     jq
-    pup
     just
     tree
     tmux

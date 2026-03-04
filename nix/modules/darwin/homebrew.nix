@@ -7,8 +7,12 @@
       cleanup = "zap";
     };
     caskArgs.appdir = "/Applications";
+    taps = [
+      "datadog-labs/pack"
+    ];
     brews = [
       "asdf"
+      "datadog-labs/pack/pup"
     ];
     casks = [
       "1password"
