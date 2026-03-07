@@ -17,7 +17,8 @@ let
       deny = [ "Bash(git reset --hard:*)" ];
       defaultMode = "plan";
     };
-    model = "opus";
+    model = "opus[1m]";
+    reasoningEffort = "medium";
     hooks = {
       PreToolUse = [{ matcher = "Bash"; hooks = [{ type = "command"; command = "$HOME/.config/claude/hooks/guard-worktree.sh"; }]; }];
       Notification = [{ hooks = [{ type = "command"; command = "afplay /System/Library/Sounds/Glass.aiff"; }]; }];
