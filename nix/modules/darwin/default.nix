@@ -15,6 +15,7 @@
     extra-substituters = https://ryoppippi.cachix.org
     extra-trusted-substituters = https://ryoppippi.cachix.org
     extra-trusted-public-keys = ryoppippi.cachix.org-1:b2LbtWNvJeL/qb1B6TYOMK+apaCps4SCbzlPRfSQIms=
+    !include /etc/nix/access-tokens.conf
   '';
 
   # Enable Fish shell system-wide (/etc/shells registration + completions)

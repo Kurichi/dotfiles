@@ -20,7 +20,7 @@
     };
 
     claude-code-overlay = {
-      url = "git+ssh://git@github.com/ryoppippi/claude-code-overlay";
+      url = "github:ryoppippi/claude-code-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
