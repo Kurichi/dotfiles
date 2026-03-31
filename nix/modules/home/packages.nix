@@ -1,4 +1,4 @@
-{ pkgs, llmPkgs, profile, ... }:
+{ pkgs, llmPkgs, profile, claudeCodePkg, ... }:
 
 {
   home.packages = with pkgs; [
@@ -28,7 +28,7 @@
     git-wt
 
     # AI tools
-    (pkgs.claude-code.overrideAttrs (old: {
+    (claudeCodePkg.overrideAttrs (old: {
       postFixup = builtins.replaceStrings
         [
           "--set DISABLE_TELEMETRY 1"

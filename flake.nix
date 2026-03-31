@@ -72,11 +72,17 @@
               home-manager.useGlobalPkgs = true;
               home-manager.useUserPackages = true;
               home-manager.backupFileExtension = "backup";
-              home-manager.extraSpecialArgs = { inherit username llmPkgs profile; };
+              home-manager.extraSpecialArgs = {
+                inherit username llmPkgs profile;
+                claudeCodePkg = claude-code-overlay.packages.${system}."2.1.87";
+              };
               home-manager.users.${username} = import ./nix/modules/home;
             }
           ];
-          specialArgs = { inherit inputs username hostname llmPkgs profile; };
+          specialArgs = {
+            inherit inputs username hostname llmPkgs profile;
+            claudeCodePkg = claude-code-overlay.packages.${system}."2.1.87";
+          };
         };
     in
     assert lib.assertMsg
