@@ -53,7 +53,9 @@
       # nix
       rebuild = "darwin-rebuild switch --flake ~/repos/github.com/Kurichi/dotfiles#${profile.profileName}";
       # claude
-      c = "claude";
+      c = if profile.profileName == "personal"
+        then "claude --allow-dangerously-skip-permissions"
+        else "claude";
     };
     functions = {
       fish_prompt = ''
