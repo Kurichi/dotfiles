@@ -96,7 +96,8 @@ Task ツールを以下のパラメータで呼び出す：
 ### Deep Tier — SubAgent Prompt テンプレート
 
 ```
-未コミットの変更を Codex CLI で adversarial review してください。
+あなたの唯一のタスクは、以下の Bash コマンドを実行し、その出力を分析することです。
+自分で git status を確認したり、独自に判断したりしないでください。必ず Bash ツールでコマンドを実行してください。
 
 ## 手順
 1. Bash ツールで以下を実行（timeout: 600000）：
@@ -110,12 +111,21 @@ trap 'rm -f "$REVIEW_OUTPUT" "$REVIEW_ERR"' EXIT
 cd "{作業ディレクトリの絶対パス}"
 SCHEMA_PATH="config/claude/skills/code-review/review-output.schema.json"
 
+# 一時 index で untracked ファイルを含む diff を取得（実際の index を汚さない）
+# git add -N は .gitignore を尊重するため、無視対象ファイルは含まれない
+TMP_INDEX=$(mktemp /tmp/codex-git-index-XXXXXX)
+trap 'rm -f "$REVIEW_OUTPUT" "$REVIEW_ERR" "$TMP_INDEX"' EXIT
+cp "$(git rev-parse --git-dir)/index" "$TMP_INDEX"
+# git add -N は .gitignore を尊重するため、秘密情報の除外は .gitignore に委任する
+# 追加の pathspec 除外はサブストリングマッチによる誤除外リスクがあるため使用しない
+GIT_INDEX_FILE="$TMP_INDEX" git add -N .
+
 # diff を明示的に取得してプロンプトに含める（codex exec には --uncommitted がないため）
 {
   printf '%s\n\n' "You are an adversarial code reviewer. Challenge design decisions, identify failure modes, security concerns, and edge cases. Be thorough and critical."
   printf '%s\n\n' "## Uncommitted Changes"
-  git diff HEAD
-  git diff HEAD --stat
+  GIT_INDEX_FILE="$TMP_INDEX" git diff HEAD
+  GIT_INDEX_FILE="$TMP_INDEX" git diff HEAD --stat
 } | codex exec \
   -m gpt-5.4 -c model_reasoning_effort="xhigh" \
   -s read-only \
@@ -152,7 +162,8 @@ cat "$REVIEW_OUTPUT"
 ### Standard Tier — SubAgent Prompt テンプレート
 
 ```
-未コミットの変更を Codex CLI でレビューしてください。
+あなたの唯一のタスクは、以下の Bash コマンドを実行し、その出力を分析することです。
+自分で git status を確認したり、独自に判断したりしないでください。必ず Bash ツールでコマンドを実行してください。
 
 ## 手順
 1. Bash ツールで以下を実行（timeout: 300000）：
@@ -171,6 +182,14 @@ codex exec review --uncommitted \
   >"$REVIEW_OUTPUT" 2>"$REVIEW_ERR"
 
 EXIT_CODE=$?
+# 正常終了かつ stdout が空の場合、stderr がレビュー本文を含むか検証してからフォールバック
+# stderr に警告ログのみが含まれる場合は昇格しない（誤検出防止）
+if [ $EXIT_CODE -eq 0 ] && [ ! -s "$REVIEW_OUTPUT" ] && [ -s "$REVIEW_ERR" ]; then
+  if grep -qiE '(LGTM|looks good|approved|no issues|finding|severity|P[0-3])' "$REVIEW_ERR"; then
+    cp "$REVIEW_ERR" "$REVIEW_OUTPUT"
+  fi
+fi
+
 if [ $EXIT_CODE -ne 0 ] || [ ! -s "$REVIEW_OUTPUT" ]; then
   echo "ERROR: codex exec review failed (exit=$EXIT_CODE)" >&2
   cat "$REVIEW_ERR" >&2
