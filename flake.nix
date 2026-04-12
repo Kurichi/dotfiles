@@ -74,14 +74,14 @@
               home-manager.backupFileExtension = "backup";
               home-manager.extraSpecialArgs = {
                 inherit username llmPkgs profile;
-                claudeCodePkg = claude-code-overlay.packages.${system}."2.1.87";
+                claudeCodePkg = claude-code-overlay.packages.${system}.default;
               };
               home-manager.users.${username} = import ./nix/modules/home;
             }
           ];
           specialArgs = {
             inherit inputs username hostname llmPkgs profile;
-            claudeCodePkg = claude-code-overlay.packages.${system}."2.1.87";
+            claudeCodePkg = claude-code-overlay.packages.${system}.default;
           };
         };
     in
