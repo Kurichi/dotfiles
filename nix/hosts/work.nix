@@ -15,6 +15,7 @@
     casks = [
       "bitwarden"
       "datagrip"
+      "rancher"
     ];
     masApps = {};
   };

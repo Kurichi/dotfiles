@@ -11,7 +11,7 @@
       "datadog-labs/pack"
     ];
     brews = [
-      "asdf"
+      "mise"
       "datadog-labs/pack/pup"
     ];
     casks = [

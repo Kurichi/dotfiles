@@ -19,13 +19,17 @@
       fish_add_path --append /nix/var/nix/profiles/default/bin
       # Homebrew
       eval (/opt/homebrew/bin/brew shellenv)
-      # asdf version manager
-      source /opt/homebrew/opt/asdf/libexec/asdf.fish
+      # Rancher Desktop CLI
+      if test -d ~/.rd/bin
+        fish_add_path --prepend ~/.rd/bin
+      end
+      # mise version manager
+      mise activate fish | source
       # VSCode
       fish_add_path --append "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
       # pnpm
       fish_add_path --append $PNPM_HOME
-      # Add home-manager packages to PATH (after asdf to ensure priority over shims)
+      # Add home-manager packages to PATH (after mise to ensure priority over shims)
       fish_add_path --path --move --prepend ~/.local/state/home-manager/gcroots/current-home/home-path/bin
 
       # git-wt shell integration (completions + auto-cd wrapper)
