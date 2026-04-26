@@ -38,7 +38,6 @@
         [ "" "" "" ]
         old.postFixup;
     }))
-    llmPkgs.codex
     llmPkgs.gemini-cli
     llmPkgs.copilot-cli
     moreutils
