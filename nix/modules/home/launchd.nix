@@ -1,4 +1,4 @@
-{ pkgs, username, ... }:
+{ pkgs, profile, username, ... }:
 let
   homeDir = "/Users/${username}";
   protonPassSigningSock = "${homeDir}/.ssh/proton-pass-agent.sock";
@@ -15,9 +15,17 @@ let
 
     ${pkgs.coreutils}/bin/rm -f "${protonPassSigningSock}"
 
-    exec ${pkgs.proton-pass-cli}/bin/pass-cli ssh-agent start \
-      --socket-path "${protonPassSigningSock}" \
+    agent_args=(
+      ssh-agent
+      start
+      --socket-path "${protonPassSigningSock}"
       --refresh-interval 3600
+    )
+    ${pkgs.lib.optionalString (profile.git ? signingVaultName) ''
+      agent_args+=(--vault-name ${pkgs.lib.escapeShellArg profile.git.signingVaultName})
+    ''}
+
+    exec ${pkgs.proton-pass-cli}/bin/pass-cli "''${agent_args[@]}"
   '';
 in {
   # Startup apps (launchd)
