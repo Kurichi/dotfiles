@@ -33,7 +33,7 @@ function cw --description "Create worktree and launch Claude Code"
     # 既存 worktree が同ブランチに存在する場合は再作成せず移動のみ
     if git worktree list | string match -q "*[$branch]*"
         cd $wt_path
-        and claude --allow-dangerously-skip-permissions
+        and claude
         return
     end
 
@@ -62,5 +62,5 @@ function cw --description "Create worktree and launch Claude Code"
     end
 
     cd $wt_path
-    and claude --allow-dangerously-skip-permissions
+    and claude
 end
