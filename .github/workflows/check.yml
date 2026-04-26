@@ -1,0 +1,36 @@
+name: flake check
+
+on:
+  pull_request:
+    paths:
+      - flake.nix
+      - flake.lock
+      - "nix/**"
+      - renovate.json
+      - ".github/workflows/**"
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@v22
+        with:
+          extra-conf: |
+            experimental-features = nix-command flakes
+
+      - uses: DeterminateSystems/magic-nix-cache-action@v13
+
+      - name: nix flake check
+        run: nix flake check --all-systems --no-build
+
+      - name: Evaluate darwinConfigurations
+        run: |
+          nix eval .#darwinConfigurations.personal.system.outPath --raw
+          nix eval .#darwinConfigurations.work.system.outPath --raw
