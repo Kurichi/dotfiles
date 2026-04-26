@@ -50,6 +50,7 @@
     # Infrastructure
     terraform
     (google-cloud-sdk.withExtraComponents [ google-cloud-sdk.components.gke-gcloud-auth-plugin ])
+    proton-pass-cli
 
     # Build tools
     ninja
