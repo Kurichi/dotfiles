@@ -19,8 +19,8 @@
     masApps = {};
   };
 
-  packages = p: with p; [
-    awscli2
-    ssm-session-manager-plugin
+  packages = p: [
+    p.awscli2
+    p.ssm-session-manager-plugin
   ];
 }

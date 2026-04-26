@@ -35,9 +35,9 @@
     };
   };
 
-  packages = p: with p; [
-    opensc
-    tailscale
-    valkey
+  packages = p: [
+    p.opensc
+    p.tailscale
+    p.valkey
   ];
 }

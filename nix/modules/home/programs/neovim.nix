@@ -7,26 +7,26 @@
     viAlias = true;
     vimAlias = true;
 
-    extraPackages = with pkgs; [
+    extraPackages = [
       # LSP Servers
-      gopls
-      lua-language-server
-      llvmPackages.clang-tools # clangd
-      dockerfile-language-server
-      docker-compose-language-service
-      vscode-langservers-extracted # html, json, css
-      marksman
-      python312Packages.python-lsp-server
-      yaml-language-server
-      typescript-language-server
-      typescript
-      terraform-ls
+      pkgs.gopls
+      pkgs.lua-language-server
+      pkgs.llvmPackages.clang-tools # clangd
+      pkgs.dockerfile-language-server
+      pkgs.docker-compose-language-service
+      pkgs.vscode-langservers-extracted # html, json, css
+      pkgs.marksman
+      pkgs.python312Packages.python-lsp-server
+      pkgs.yaml-language-server
+      pkgs.typescript-language-server
+      pkgs.typescript
+      pkgs.terraform-ls
 
       # Formatters / Linters
-      stylua
-      gotools # goimports
-      golangci-lint
-      terraform
+      pkgs.stylua
+      pkgs.gotools # goimports
+      pkgs.golangci-lint
+      pkgs.terraform
     ];
   };
 
