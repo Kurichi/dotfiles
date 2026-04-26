@@ -1,31 +1,31 @@
 { pkgs, llmPkgs, profile, claudeCodePkg, ... }:
 
 {
-  home.packages = with pkgs; [
+  home.packages = [
     # CLI tools
-    ripgrep
-    fd
-    bat
-    eza
-    fzf
-    ghq
-    jq
-    just
-    tree
-    tmux
+    pkgs.ripgrep
+    pkgs.fd
+    pkgs.bat
+    pkgs.eza
+    pkgs.fzf
+    pkgs.ghq
+    pkgs.jq
+    pkgs.just
+    pkgs.tree
+    pkgs.tmux
 
     # Development
-    nodejs
-    nodePackages.pnpm
-    bun
-    uv
-    go_1_26
-    rustup
+    pkgs.nodejs
+    pkgs.nodePackages.pnpm
+    pkgs.bun
+    pkgs.uv
+    pkgs.go_1_26
+    pkgs.rustup
 
     # Git tools
-    gh
-    lazygit
-    git-wt
+    pkgs.gh
+    pkgs.lazygit
+    pkgs.git-wt
 
     # AI tools
     (claudeCodePkg.overrideAttrs (old: {
@@ -41,25 +41,27 @@
     llmPkgs.codex
     llmPkgs.gemini-cli
     llmPkgs.copilot-cli
-    moreutils
+    pkgs.moreutils
 
     # Linters
-    actionlint
-    shellcheck
+    pkgs.actionlint
+    pkgs.shellcheck
 
     # Infrastructure
-    terraform
-    (google-cloud-sdk.withExtraComponents [ google-cloud-sdk.components.gke-gcloud-auth-plugin ])
+    pkgs.terraform
+    (pkgs.google-cloud-sdk.withExtraComponents [
+      pkgs.google-cloud-sdk.components.gke-gcloud-auth-plugin
+    ])
 
     # Build tools
-    ninja
+    pkgs.ninja
 
     # PDF tools
-    pkgs."poppler-utils"
+    pkgs.poppler-utils
 
     # Fonts
-    nerd-fonts.hack
-    nerd-fonts.intone-mono
-    noto-fonts-cjk-sans
+    pkgs.nerd-fonts.hack
+    pkgs.nerd-fonts.intone-mono
+    pkgs.noto-fonts-cjk-sans
   ] ++ ((profile.packages or (_: [])) pkgs);
 }
