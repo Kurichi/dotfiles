@@ -1,7 +1,11 @@
-{ pkgs, profile, username, ... }:
+{ lib, pkgs, profile, username, ... }:
 let
   protonPassSigningSock = "/Users/${username}/.ssh/proton-pass-agent.sock";
-  signingKeyPath = profile.git.signingKey or "/Users/${username}/.ssh/github.pub";
+  hasManagedSigningKey = profile.git ? signingKeyText;
+  signingKeyPath =
+    if hasManagedSigningKey
+    then "/Users/${username}/.ssh/git-signing.pub"
+    else profile.git.signingKey or "/Users/${username}/.ssh/github.pub";
   fallbackSshSignProgram = profile.git.gpgSignProgram or "${pkgs.openssh}/bin/ssh-keygen";
   protonPassSshSign = pkgs.writeShellScript "git-ssh-sign" ''
     set -eu
@@ -43,6 +47,10 @@ let
     exec "${fallbackSshSignProgram}" "$@"
   '';
 in {
+  home.file = lib.optionalAttrs hasManagedSigningKey {
+    ".ssh/git-signing.pub".text = "${profile.git.signingKeyText}\n";
+  };
+
   programs.git = {
     enable = true;
     lfs.enable = true;
