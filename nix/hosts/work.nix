@@ -4,7 +4,7 @@
 
   git = {
     userName = "Yuya Kurihara";
-    userEmail = "yuya.kurihara@cyberagent.co.jp";
+    userEmail = "kurihara_yuya@cyberagent.co.jp";
     signingKeyText = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGhmZRh1V62B0ijzOjDgjzOOdWfauf3+6FqEd15rIi3p git-signing";
     signingVaultName = "Personal";
     gpgSign = true;
