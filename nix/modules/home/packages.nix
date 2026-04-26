@@ -16,7 +16,7 @@
 
     # Development
     nodejs
-    nodePackages.pnpm
+    pnpm
     bun
     uv
     go_1_26
