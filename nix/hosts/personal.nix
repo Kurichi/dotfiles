@@ -24,7 +24,6 @@
       "orbstack"
       "postman-agent"
       "proton-mail"
-      "proton-pass"
       "proton-drive"
       "slack"
       "steam"
