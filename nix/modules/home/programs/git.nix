@@ -56,6 +56,7 @@
       ".idea"
       ".vscode"
       ".claude/settings.local.json"
+      ".claude/worktrees/"
     ];
   };
 }
