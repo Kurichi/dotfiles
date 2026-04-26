@@ -16,6 +16,7 @@
       "bitwarden"
       "datagrip"
       "rancher"
+      "slack"
     ];
     masApps = {};
   };
