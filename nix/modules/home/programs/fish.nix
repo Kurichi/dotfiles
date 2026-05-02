@@ -23,14 +23,14 @@
       if test -d ~/.rd/bin
         fish_add_path --prepend ~/.rd/bin
       end
+      # Add home-manager packages before mise captures the base PATH.
+      fish_add_path --path --move --prepend ~/.local/state/home-manager/gcroots/current-home/home-path/bin
       # mise version manager
       mise activate fish | source
       # VSCode
       fish_add_path --append "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
       # pnpm
       fish_add_path --append $PNPM_HOME
-      # Add home-manager packages to PATH (after mise to ensure priority over shims)
-      fish_add_path --path --move --prepend ~/.local/state/home-manager/gcroots/current-home/home-path/bin
 
       # git-wt shell integration (completions + auto-cd wrapper)
       git-wt --init fish | source
