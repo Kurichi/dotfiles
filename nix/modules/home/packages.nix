@@ -10,6 +10,7 @@
     fzf
     ghq
     jq
+    xh
     just
     tree
     tmux
