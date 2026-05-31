@@ -20,7 +20,7 @@
     # 暫定として直前の commit 6ff92d21 (gemini-cli 0.39.0 + 旧 fetcher) に pin。
     # upstream で修正されたらこの pin を外して `github:numtide/llm-agents.nix` に戻す。
     llm-agents = {
-      url = "github:numtide/llm-agents.nix/aba65497c7a653e78ac3966b8d3e0ace6c0f469f";
+      url = "github:numtide/llm-agents.nix/22f334071497ce8cfd556a507d7e57fd45d88293";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
