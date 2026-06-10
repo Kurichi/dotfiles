@@ -4,7 +4,8 @@
     enable = true;
     onActivation = {
       autoUpdate = true;
-      cleanup = "zap";
+      # cleanup は一旦無効化（最近の Homebrew では `brew bundle --cleanup` が --force 必須になり活性化が失敗するため）
+      cleanup = "none";
     };
     caskArgs.appdir = "/Applications";
     taps = [
