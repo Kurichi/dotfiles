@@ -14,6 +14,7 @@
 
   homebrew = {
     casks = [
+      "alt-tab"
       "bitwarden"
       "datagrip"
       "rancher"
