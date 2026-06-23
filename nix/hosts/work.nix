@@ -10,12 +10,11 @@
     gpgSign = true;
   };
 
-  sshAuthSock = "/Users/s30264/.bitwarden-ssh-agent.sock";
+  sshAuthSock = "/Users/s30264/.ssh/proton-pass-agent.sock";
 
   homebrew = {
     casks = [
       "alt-tab"
-      "bitwarden"
       "datagrip"
       "notion-calendar"
       "rancher"
