@@ -20,6 +20,7 @@
       "google-chrome"
       "google-drive"
       "notion"
+      "notion-calendar"
       "onedrive"
       "orbstack"
       "postman-agent"

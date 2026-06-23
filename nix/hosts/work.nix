@@ -17,6 +17,7 @@
       "alt-tab"
       "bitwarden"
       "datagrip"
+      "notion-calendar"
       "rancher"
       "slack"
     ];
