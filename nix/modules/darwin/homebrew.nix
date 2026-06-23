@@ -10,10 +10,12 @@
     caskArgs.appdir = "/Applications";
     taps = [
       "datadog-labs/pack"
+      "jakehilborn/jakehilborn"
     ];
     brews = [
       "mise"
       "datadog-labs/pack/pup"
+      "jakehilborn/jakehilborn/displayplacer"
     ];
     casks = [
       "1password"
