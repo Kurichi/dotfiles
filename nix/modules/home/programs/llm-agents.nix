@@ -17,7 +17,7 @@ let
       deny = [ "Bash(git reset --hard:*)" ];
       defaultMode = "plan";
     };
-    model = "opus[1m]";
+    model = "opusplan";
     reasoningEffort = "medium";
     hooks = {
       PreToolUse = [{ matcher = "Bash"; hooks = [{ type = "command"; command = "$HOME/.config/claude/hooks/guard-worktree.sh"; }]; }];

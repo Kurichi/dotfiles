@@ -35,8 +35,14 @@
           "--set DISABLE_TELEMETRY 1"
           "--set DISABLE_NON_ESSENTIAL_MODEL_CALLS 1"
           "--set CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC 1"
+          "--set DISABLE_INSTALLATION_CHECKS 1"
         ]
-        [ "" "" "" ]
+        [
+          ""
+          ""
+          ""
+          "--set DISABLE_INSTALLATION_CHECKS 1 \\\n  --set ANTHROPIC_DEFAULT_OPUS_MODEL \"claude-fable-5[1m]\""
+        ]
         old.postFixup;
     }))
     llmPkgs.gemini-cli
