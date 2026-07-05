@@ -8,6 +8,10 @@ let
     env = {
       EDITOR = "nvim";
       CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
+      # AskUserQuestion の60秒無応答で自動継続してしまう挙動(AFK auto-continue)の抑制
+      # 0/負数は即時発火する既知のバグがあるため int32 最大値を指定
+      CLAUDE_AFK_TIMEOUT_MS = "2147483647";
+      CLAUDE_AFK_COUNTDOWN_MS = "2147483647";
     };
     permissions = {
       allow = [
