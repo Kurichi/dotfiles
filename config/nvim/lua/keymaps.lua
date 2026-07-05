@@ -25,6 +25,7 @@ keymap("n", "<Leader>h", "<C-w>h", opts)
 keymap("n", "<Leader>j", "<C-w>j", opts)
 keymap("n", "<Leader>k", "<C-w>k", opts)
 keymap("n", "<Leader>l", "<C-w>l", opts)
+keymap("n", "<Leader>b", "<C-o>", opts)
 
 -- LSP keymaps (neovim only, not vscode-neovim)
 if not vim.g.vscode then
