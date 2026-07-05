@@ -43,6 +43,8 @@ tflint --recursive
 
 ### 3. Git 状態確認・コミット
 
+`git status` と `git add` は通常どおり実行してよい。`git commit` は SSH 署名鍵/socket へアクセスするため、最初からサンドボックス外実行（許可要求）で行うこと。サンドボックス内で先に失敗させてから再実行しない。
+
 ```bash
 # 変更状態を確認
 git status
@@ -51,7 +53,7 @@ git status
 # .env, credentials, secrets などは除外
 git add <files>
 
-# Conventional Commit 形式でコミット
+# Conventional Commit 形式でコミット（SSH 署名のため最初からサンドボックス外実行）
 git commit -m "<type>(<scope>): <description>"
 ```
 
@@ -65,8 +67,10 @@ git commit -m "<type>(<scope>): <description>"
 
 ### 4. プッシュ
 
+SSH remote 認証が必要になるため、リモートブランチ初回の `git push -u origin <branch>` は最初からサンドボックス外実行（許可要求）で行うこと。
+
 ```bash
-# リモートブランチの有無を確認し、適切にプッシュ
+# リモートブランチの有無を確認し、適切にプッシュ（初回 push はサンドボックス外実行）
 git push -u origin <branch>
 ```
 
