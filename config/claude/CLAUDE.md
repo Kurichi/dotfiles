@@ -27,6 +27,7 @@
 
 ### Git コマンド
 - ブランチの作成は `git switch` コマンドを使用してください．
+- この dotfiles では SSH 署名付きコミットと SSH GitHub remote を使用しているため、`git commit` とリモートブランチ初回の `git push` は最初からサンドボックス外実行（許可要求）で行うこと。サンドボックス内で先に失敗させてから署名鍵/socket のブロックを報告する流れにしないこと。
 
 ### GitHub API
 - `gh api` でデータを取得する際は、必ず `--jq` フラグで必要なフィールドのみ抽出すること（トークン節約のため）。
@@ -44,7 +45,7 @@
 - あなたは既に作業用 worktree 内で起動されていることを前提とする。worktree の作成・削除（`git wt <branch>`、`git wt -d <branch>` 等）は自分で行わないこと。
 - main ブランチのワークツリーに直接変更を加えないこと。**起動時のカレントディレクトリから `cd` で離れないこと。**（PreToolUse hook で linked worktree 上での cd/pushd/popd はブロックされる）
 - `/codex:review`（通常の変更）と `/codex:adversarial-review`（セキュリティ・アーキテクチャ変更等）は `disable-model-invocation: true` が設定されており、Claude 自身が自律的に呼び出すことはできない（ユーザーが手動で入力する前提のコマンド）。実装完了後に自動でレビューを走らせたい場合は `/codex:setup --enable-review-gate` で `stopReviewGate`（Stop hook）を有効化しておくこと。これはハーネスレベルで動くため、Claude の判断を介さずターン終了時に自動で diff レビューが走る。
-- `stopReviewGate` が有効な場合、レビューが通過したら、ユーザーに確認せず自動的にコミット・プッシュ・PR 作成まで行ってよい。無効な場合は、コミット前にユーザーへ `/codex:review` の実行を促すこと。
+- `stopReviewGate` が有効な場合、レビューが通過したら、ユーザーに確認せず自動的にコミット・プッシュ・PR 作成まで行ってよい。無効な場合は、コミット前にユーザーへ `/codex:review` の実行を促すこと。ただし `git commit` と初回 `git push` は上記の SSH 署名/認証ルールに従い、最初からサンドボックス外実行として扱うこと。
 
 ## プランモード
 
