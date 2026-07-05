@@ -43,10 +43,9 @@
 ### 作業ワークフロー
 - あなたは既に作業用 worktree 内で起動されていることを前提とする。worktree の作成・削除（`git wt <branch>`、`git wt -d <branch>` 等）は自分で行わないこと。
 - main ブランチのワークツリーに直接変更を加えないこと。**起動時のカレントディレクトリから `cd` で離れないこと。**（PreToolUse hook で linked worktree 上での cd/pushd/popd はブロックされる）
-- `codex exec` の実行は **Task ツール（SubAgent）経由** で行い、生の出力によるコンテキスト圧迫を防ぐこと。
-- 一連の作業が完了したら、code-review スキルを使用してレビューを依頼すること。
-- レビューが通過したら、ユーザーに確認せず自動的にコミット・プッシュ・PR 作成まで行うこと。
+- `/codex:review`（通常の変更）と `/codex:adversarial-review`（セキュリティ・アーキテクチャ変更等）は `disable-model-invocation: true` が設定されており、Claude 自身が自律的に呼び出すことはできない（ユーザーが手動で入力する前提のコマンド）。実装完了後に自動でレビューを走らせたい場合は `/codex:setup --enable-review-gate` で `stopReviewGate`（Stop hook）を有効化しておくこと。これはハーネスレベルで動くため、Claude の判断を介さずターン終了時に自動で diff レビューが走る。
+- `stopReviewGate` が有効な場合、レビューが通過したら、ユーザーに確認せず自動的にコミット・プッシュ・PR 作成まで行ってよい。無効な場合は、コミット前にユーザーへ `/codex:review` の実行を促すこと。
 
 ## プランモード
 
-ExitPlanMode を呼ぶ前に、plan-review スキルを使用して Codex CLI にレビューを依頼すること。ただし、plan-review スキルの「Skip Condition」に該当する場合はスキップしてよい。
+Plan Mode 中は SubAgent も書き込み・実行系ツール（Bash 実行等）を使えないため、`codex exec` を伴う plan-review は ExitPlanMode より前には実行できない。そのため、ユーザーがプランを承認した直後、最初の Edit/Write を行う前に、plan-review スキルを使用して Codex CLI にレビューを依頼すること。問題が指摘された場合は実装を止めて Plan Mode に戻り修正すること。ただし、plan-review スキルの「Skip Condition」に該当する場合はスキップしてよい。
