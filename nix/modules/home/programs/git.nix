@@ -94,6 +94,7 @@ in {
       wt = {
         basedir = ".wt";
         copyignored = true;
+        nocopy = [ ".venv/" ];
       };
     };
     ignores = [
