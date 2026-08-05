@@ -3,6 +3,13 @@ let
   cfg = profile.ssh or null;
 in
 lib.mkIf (cfg != null) {
+  # 認証用の公開鍵を Nix 管理で配置する。秘密鍵は Proton Pass の agent が保持するため、
+  # ここに置くのは IdentityFile が指す公開鍵のみ。署名鍵 (~/.ssh/git-signing.pub) は
+  # git.nix が別途生成する ―― 認証と署名で鍵を分離するための構成。
+  home.file = lib.mapAttrs'
+    (name: text: lib.nameValuePair ".ssh/${name}" { text = "${text}\n"; })
+    (cfg.identityFiles or { });
+
   programs.ssh = {
     enable = true;
 

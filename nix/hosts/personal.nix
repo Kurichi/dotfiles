@@ -5,8 +5,10 @@
   git = {
     userName = "Kurichi";
     userEmail = "me@kurichi.dev";
-    # GitHub に認証用 / 署名用の両方で登録済みの Proton Pass 鍵
-    # ("Proton Pass - Kurichi-MacBook-Pro" / SHA256:FPmyikU3yRQreSoPIl4IJCstOFOcRi+lnWV9nhkNjYE)
+    # 署名専用の Proton Pass 鍵。認証には使わない
+    # （認証は ssh.identityFiles."github-auth.pub" 側）
+    # TODO: pass-cli login 後に `pass-cli item create ssh-key generate` で生成した
+    #       署名専用鍵に差し替える。現在は暫定で認証鍵と同一。
     signingKeyText = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMyXCW68C7NXKIKY/ZPvjcDYSxTLQM4XDQ/BdkULrMEh GitHub - Kurichi-MacBook-Pro";
     # signingVaultName は意図的に未設定。これは pass-cli ssh-agent start --vault-name に渡され、
     # 署名鍵だけでなく agent が読み込む鍵全体を絞り込むため、reserpick / lab の鍵が
@@ -20,12 +22,19 @@
 
   ssh = {
     includes = [ "~/.orbstack/ssh/config" ];
+
+    identityFiles = {
+      # GitHub 認証専用の Proton Pass 鍵。署名には使わない（署名は
+      # git.signingKeyText -> ~/.ssh/git-signing.pub を使う）
+      "github-auth.pub" = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMyXCW68C7NXKIKY/ZPvjcDYSxTLQM4XDQ/BdkULrMEh GitHub - Kurichi-MacBook-Pro";
+    };
+
     matchBlocks = {
       github = {
         host = "github github.com";
         hostname = "github.com";
         user = "git";
-        identityFile = "~/.ssh/git-signing.pub";
+        identityFile = "~/.ssh/github-auth.pub";
         identityAgent = "~/.ssh/proton-pass-agent.sock";
         identitiesOnly = true;
       };
