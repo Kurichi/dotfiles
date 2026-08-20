@@ -21,7 +21,6 @@
       "1password"
       "homerow"
       "proton-pass"
-      "raycast"
       "wezterm@nightly"
     ] ++ (profile.homebrew.casks or []);
     masApps = profile.homebrew.masApps or {};
