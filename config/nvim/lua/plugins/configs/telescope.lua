@@ -28,6 +28,10 @@ telescope.setup({
       "--column",
       "--smart-case",
       "-uu",
+      -- worktree はリポジトリの完全なコピーなので重複ヒットを防ぐ
+      -- (-uu で gitignore を無視しているため glob で明示的に除外する)
+      "--glob=!**/.wt/**",
+      "--glob=!**/.claude/worktrees/**",
     },
   },
   extensions = {
