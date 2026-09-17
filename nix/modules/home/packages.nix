@@ -41,7 +41,7 @@
           ""
           ""
           ""
-          "--set DISABLE_INSTALLATION_CHECKS 1 \\\n  --set ANTHROPIC_DEFAULT_OPUS_MODEL \"claude-fable-5[1m]\""
+          "--set DISABLE_INSTALLATION_CHECKS 1"
         ]
         old.postFixup;
     }))
