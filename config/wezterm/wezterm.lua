@@ -16,6 +16,7 @@ config.color_scheme = "SpaceGray Eighties Dull"
 config.window_background_opacity = 0.85     -- 不透明度
 config.macos_window_background_blur = 20    -- ぼかし
 config.window_decorations = "RESIZE"        -- ヘッダー非表示
+config.audible_bell = "Disabled"            -- toast通知と二重にならないようシステムビープを無効化
 config.hide_tab_bar_if_only_one_tab = false -- タブが1つの時も表示
 config.window_frame = {
   inactive_titlebar_bg = "none",
@@ -53,6 +54,16 @@ wezterm.on("format-tab-title", function(tab, tabs, panes, config, hover, max_wid
     { Foreground = { Color = foreground } },
     { Text = title },
   }
+end)
+
+-- Claude Code の hook が送る BEL を toast 通知に変換する
+-- (端末タイトルには hook 側で OSC 0 によりメッセージ本文がセットされている)
+wezterm.on("bell", function(window, pane)
+  local process_info = pane:get_foreground_process_info()
+  local process_name = process_info and process_info.name or ""
+  if process_name:lower():find("claude") then
+    window:toast_notification("Claude Code", pane:get_title(), nil, 4000)
+  end
 end)
 
 -- position & size
