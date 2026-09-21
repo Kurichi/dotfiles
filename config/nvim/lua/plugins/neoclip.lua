@@ -1,7 +1,7 @@
 return {
-  { "kkharji/sqlite.lua", module = "sqlite" },
   {
     "AckslD/nvim-neoclip.lua",
+    dependencies = { "kkharji/sqlite.lua" },
     keys = {
       { "<leader>p", desc = "Paste from neoclip", mode = "n" },
     },

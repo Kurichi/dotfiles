@@ -1,5 +1,3 @@
-print("Loading markdown.lua")
-
 local options = {
 	-- indent
 	tabstop = 2,

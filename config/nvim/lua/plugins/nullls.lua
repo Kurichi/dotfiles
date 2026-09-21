@@ -1,7 +1,9 @@
 return {
   {
     "nvimtools/none-ls.nvim",
-    event = { "InsertEnter" },
+    -- BufWritePre の autocmd は attach 時に張られるので、insert に入らず
+    -- :w しても保存時フォーマットが走るよう読み込み時点で attach させる
+    event = { "BufReadPre", "BufNewFile" },
     config = function()
       local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
       local null_ls = require("null-ls")
@@ -15,7 +17,7 @@ return {
           null_ls.builtins.formatting.terraform_fmt,
         },
         on_attach = function(client, bufnr)
-          if client.supports_method("textDocument/formatting") then
+          if client:supports_method("textDocument/formatting") then
             vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
             vim.api.nvim_create_autocmd("BufWritePre", {
               group = augroup,
