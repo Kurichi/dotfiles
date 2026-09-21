@@ -73,6 +73,13 @@ if not vim.g.vscode then
   keymap("i", "<C-k>", function()
     return vim.fn.pumvisible() == 1 and "<C-p>" or "<C-k>"
   end, { expr = true, silent = true })
+
+  -- Copilot のゴーストテキストを採用する。候補が無ければ本来の <C-f> に流す
+  keymap("i", "<C-f>", function()
+    if not vim.lsp.inline_completion.get() then
+      return "<C-f>"
+    end
+  end, { expr = true, silent = true })
 end
 
 -- Visual --
