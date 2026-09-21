@@ -1,7 +1,7 @@
 return {
   {
     "numToStr/Comment.nvim",
-    config = {
+    opts = {
       padding = true,
       sticky = true,
       ignore = nil,

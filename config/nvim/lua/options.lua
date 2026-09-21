@@ -59,6 +59,19 @@ local options = {
   smartcase = true,
   hlsearch = false,
 
+  -- completion (Neovim 0.12 組み込み補完)
+  autocomplete = true,
+  -- o=omnifunc(LSP), .wbu=バッファ, kspell=スペル。^5 は各ソースの件数上限
+  complete = ".^5,w^5,b^5,u^5,o,kspell",
+  -- menu が無いと noselect/noinsert が機能せず候補が直接挿入される。
+  -- noselect は 'autocomplete' 時に自動付与されるが、lsp-completion のヘルプが
+  -- 明示を推奨しているので書いておく
+  completeopt = "menu,menuone,popup,fuzzy,noselect",
+
+  -- spell ('complete' の kspell が参照する)
+  spell = true,
+  spelllang = "en_us",
+
   -- manipulation
   clipboard = "unnamedplus",
   shell = "fish",
@@ -87,7 +100,7 @@ vim.api.nvim_set_hl(0, "YankHighlight", { bg = "#553311" })
 vim.api.nvim_create_autocmd("TextYankPost", {
   pattern = "*",
   callback = function()
-    vim.highlight.on_yank({ higroup = "YankHighlight", timeout = 200 })
+    vim.hl.on_yank({ higroup = "YankHighlight", timeout = 200 })
   end,
 })
 

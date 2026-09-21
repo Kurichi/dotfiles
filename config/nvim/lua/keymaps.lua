@@ -37,6 +37,44 @@ end
 keymap("i", "jj", "<Esc>", opts)
 keymap("i", "jk", "<Esc>", opts)
 
+-- Completion (Neovim 0.12 組み込み補完)
+-- 確定は必ず <C-y>。スニペット展開・auto-import・additionalTextEdits は
+-- <C-y> 確定時の副作用として実行されるため、他のキーに割り当てると
+-- 「補完は入るが import が付かない」状態になる
+if not vim.g.vscode then
+  -- <Tab>/<S-Tab> は 0.12 が既定でスニペットジャンプに割り当てているので
+  -- 上書きする以上そのフォールバックは自前で維持する
+  keymap({ "i", "s" }, "<Tab>", function()
+    if vim.fn.pumvisible() == 1 then
+      -- 'autocomplete' は候補を未選択で出すため、<C-y> だけでは何も入らない。
+      -- 未選択なら先頭候補を選んでから確定する
+      if vim.fn.complete_info({ "selected" }).selected == -1 then
+        return "<C-n><C-y>"
+      end
+      return "<C-y>"
+    end
+    if vim.snippet.active({ direction = 1 }) then
+      return "<Cmd>lua vim.snippet.jump(1)<CR>"
+    end
+    return "<Tab>"
+  end, { expr = true, silent = true })
+
+  keymap({ "i", "s" }, "<S-Tab>", function()
+    if vim.snippet.active({ direction = -1 }) then
+      return "<Cmd>lua vim.snippet.jump(-1)<CR>"
+    end
+    return "<S-Tab>"
+  end, { expr = true, silent = true })
+
+  keymap("i", "<C-j>", function()
+    return vim.fn.pumvisible() == 1 and "<C-n>" or "<C-j>"
+  end, { expr = true, silent = true })
+
+  keymap("i", "<C-k>", function()
+    return vim.fn.pumvisible() == 1 and "<C-p>" or "<C-k>"
+  end, { expr = true, silent = true })
+end
+
 -- Visual --
 keymap("v", "<", "<gv", opts)
 keymap("v", ">", ">gv", opts)

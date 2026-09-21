@@ -1,10 +1,9 @@
 return {
   -- Lualine
-  { "nvim-tree/nvim-web-devicons", opt = true },
+  { "nvim-tree/nvim-web-devicons" },
   {
     "nvim-lualine/lualine.nvim",
     event = { "BufNewFile", "BufRead" },
-    options = { theme = "gruvbox" },
     config = true,
   },
 
@@ -27,7 +26,6 @@ return {
       require("catppuccin").setup({
         transparent_background = true,
         integrations = {
-          cmp = true,
           gitsigns = true,
           nvimtree = true,
         },

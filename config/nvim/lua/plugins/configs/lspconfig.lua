@@ -1,16 +1,6 @@
 -- nvim-lspconfig v3.0.0+ / Neovim 0.11+ の vim.lsp.config API を使用
-
--- cmp-nvim-lsp の capabilities を設定
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-local ok, cmp_nvim_lsp = pcall(require, "cmp_nvim_lsp")
-if ok then
-	capabilities = cmp_nvim_lsp.default_capabilities(capabilities)
-end
-
--- グローバル設定（全LSPに適用）
-vim.lsp.config("*", {
-	capabilities = capabilities,
-})
+-- capabilities は make_client_capabilities() が snippetSupport / resolveSupport /
+-- inlineCompletion を既に含むため明示設定は不要
 
 -- デフォルト設定のLSP
 local servers = {
@@ -40,9 +30,20 @@ vim.lsp.config("gopls", {
 			completeUnimported = true,
 			usePlaceholders = true,
 			analyses = { unusedparams = true },
+			staticcheck = true,
+			gofumpt = true,
 		},
-		staticcheck = true,
-		gofumpt = true,
 	},
 })
 vim.lsp.enable("gopls")
+
+-- 組み込み補完を LSP バッファで有効化。
+-- 自動発火は 'autocomplete' + 'complete' の "o"(omnifunc) が担うので autotrigger は付けない。
+-- 両方有効にすると 2 つの機構が互いに再トリガーし、候補が勝手に挿入される。
+-- ここでの enable は CompleteDone 経由の auto-import / スニペット展開を有効にするために必要。
+vim.api.nvim_create_autocmd("LspAttach", {
+	group = vim.api.nvim_create_augroup("LspCompletion", {}),
+	callback = function(args)
+		vim.lsp.completion.enable(true, args.data.client_id, args.buf)
+	end,
+})
