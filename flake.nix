@@ -14,13 +14,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # NOTE: 6545e91e (2026-04-23) の "treewide: drop vendored prefetch-npm-deps,
-    # use upstream fetcherVersion=2" 以降、gemini-cli を含む複数パッケージで
-    # npmDepsHash と source の package-lock.json が整合せず ENOTCACHED を起こす。
-    # 暫定として直前の commit 6ff92d21 (gemini-cli 0.39.0 + 旧 fetcher) に pin。
-    # upstream で修正されたらこの pin を外して `github:numtide/llm-agents.nix` に戻す。
     llm-agents = {
-      url = "github:numtide/llm-agents.nix/aba65497c7a653e78ac3966b8d3e0ace6c0f469f";
+      url = "github:numtide/llm-agents.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

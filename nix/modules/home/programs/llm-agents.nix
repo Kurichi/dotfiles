@@ -26,7 +26,7 @@ let
     hooks = {
       PreToolUse = [{ matcher = "Bash"; hooks = [{ type = "command"; command = "$HOME/.config/claude/hooks/guard-worktree.sh"; }]; }];
       Notification = [{ hooks = [{ type = "command"; command = "$HOME/.config/claude/hooks/notify.sh"; }]; }];
-      Stop = [{ hooks = [{ type = "command"; command = "afplay /System/Library/Sounds/Funk.aiff"; }]; }];
+      Stop = [{ hooks = [{ type = "command"; command = "$HOME/.config/claude/hooks/notify.sh 'タスク完了'"; }]; }];
     };
     statusLine = { type = "command"; command = "bunx -y ccstatusline@latest"; padding = 0; };
     outputStyle = "Explanatory";

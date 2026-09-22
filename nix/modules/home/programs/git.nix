@@ -7,6 +7,13 @@ let
     then "/Users/${username}/.ssh/git-signing.pub"
     else profile.git.signingKey or "/Users/${username}/.ssh/github.pub";
   fallbackSshSignProgram = profile.git.gpgSignProgram or "${pkgs.openssh}/bin/ssh-keygen";
+  allowedSignersPath = "/Users/${username}/.config/git/allowed_signers";
+  # `<type> <base64>` だけに正規化する。コメント欄が付いたままだと突き合わせに失敗しうる
+  signingKeyNormalized =
+    if hasManagedSigningKey
+    then builtins.concatStringsSep " "
+      (lib.take 2 (lib.splitString " " profile.git.signingKeyText))
+    else null;
   protonPassSshSign = pkgs.writeShellScript "git-ssh-sign" ''
     set -eu
 
@@ -44,11 +51,18 @@ let
       fi
     fi
 
+    echo "git-ssh-sign: proton-pass agent unavailable; falling back to ${fallbackSshSignProgram}" >&2
+    echo "git-ssh-sign: recover with: pass-cli login && launchctl kickstart -k gui/\$(id -u)/org.nix-community.home.proton-pass-ssh-agent" >&2
+
     exec "${fallbackSshSignProgram}" "$@"
   '';
 in {
   home.file = lib.optionalAttrs hasManagedSigningKey {
     ".ssh/git-signing.pub".text = "${profile.git.signingKeyText}\n";
+    # `git log --show-signature` / `%G?` がローカルで検証できるようにする。
+    # 未設定だと署名があっても常に E（検証不能）になる。
+    ".config/git/allowed_signers".text =
+      "${profile.git.userEmail} ${signingKeyNormalized}\n";
   };
 
   programs.git = {
@@ -82,7 +96,11 @@ in {
       rerere.enabled = true;
       gpg = {
         format = "ssh";
-        ssh.program = "${protonPassSshSign}";
+        ssh = {
+          program = "${protonPassSshSign}";
+        } // lib.optionalAttrs hasManagedSigningKey {
+          allowedSignersFile = allowedSignersPath;
+        };
       };
       url = {
         "ssh://git@github.com/" = {

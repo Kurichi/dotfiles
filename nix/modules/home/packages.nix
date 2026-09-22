@@ -40,6 +40,7 @@
           ""
           ""
           ""
+          "--set DISABLE_INSTALLATION_CHECKS 1"
         ]
         old.postFixup;
     }))

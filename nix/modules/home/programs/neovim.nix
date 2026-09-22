@@ -21,6 +21,7 @@
       typescript-language-server
       typescript
       terraform-ls
+      copilot-language-server
 
       # Formatters / Linters
       stylua
