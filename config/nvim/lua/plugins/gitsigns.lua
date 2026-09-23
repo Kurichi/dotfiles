@@ -1,6 +1,22 @@
 return {
   "lewis6991/gitsigns.nvim",
   event = { "BufReadPre", "BufNewFile" },
+  keys = {
+    { "<leader>gb", "<cmd>Gitsigns blame<cr>", desc = "Blame file" },
+    { "<leader>gt", "<cmd>Gitsigns toggle_current_line_blame<cr>", desc = "Toggle line blame" },
+  },
+  init = function()
+    vim.api.nvim_create_autocmd("FileType", {
+      -- blame ウィンドウと、そこから s/S で開く commit バッファ (gitsigns://...) を q で閉じる
+      pattern = { "gitsigns-blame", "git" },
+      callback = function(ev)
+        if ev.match == "git" and not vim.api.nvim_buf_get_name(ev.buf):match("^gitsigns://") then
+          return
+        end
+        vim.keymap.set("n", "q", "<cmd>close<cr>", { buffer = ev.buf, desc = "Close" })
+      end,
+    })
+  end,
   opts = {
     signs = {
       add = { text = "┃" },
