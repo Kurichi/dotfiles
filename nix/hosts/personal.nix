@@ -27,14 +27,15 @@
       "github-auth.pub" = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMyXCW68C7NXKIKY/ZPvjcDYSxTLQM4XDQ/BdkULrMEh GitHub - Kurichi-MacBook-Pro";
     };
 
-    matchBlocks = {
-      github = {
-        host = "github github.com";
-        hostname = "github.com";
-        user = "git";
-        identityFile = "~/.ssh/github-auth.pub";
-        identityAgent = "~/.ssh/proton-pass-agent.sock";
-        identitiesOnly = true;
+    # programs.ssh.settings 形式。属性名がそのまま Host パターンになり、
+    # ディレクティブは OpenSSH 本来の名前（HostName, User, ...）で書く
+    settings = {
+      "github github.com" = {
+        HostName = "github.com";
+        User = "git";
+        IdentityFile = "~/.ssh/github-auth.pub";
+        IdentityAgent = "~/.ssh/proton-pass-agent.sock";
+        IdentitiesOnly = true; # yes として出力される
       };
     };
   };

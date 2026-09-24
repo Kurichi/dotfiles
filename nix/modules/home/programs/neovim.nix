@@ -7,6 +7,12 @@
     viAlias = true;
     vimAlias = true;
 
+    # config/nvim は Ruby/Python provider を使わないため、26.05 の新デフォルトを
+    # 明示して stateVersion < 26.05 のデフォルト変更警告を解消する。
+    # extraPackages の python-lsp-server は独立した LSP バイナリで provider とは無関係
+    withRuby = false;
+    withPython3 = false;
+
     extraPackages = with pkgs; [
       # LSP Servers
       gopls

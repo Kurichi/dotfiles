@@ -13,25 +13,24 @@ lib.mkIf (cfg != null) {
   programs.ssh = {
     enable = true;
 
-    # 既定値は `AddKeysToAgent no` / `ServerAliveInterval 0` を注入したうえで
-    # ビルドのたびに非推奨警告を出す。必要な値は matchBlocks."*" に明示する。
+    # true のままだと `AddKeysToAgent no` / `ServerAliveInterval 0` 等が
+    # mkDefault で注入され、非推奨警告も出る。必要な既定値は settings."*" に明示する。
     enableDefaultConfig = false;
 
-    # home-manager の生成順は extraOptionOverrides -> Include -> 個別 matchBlocks -> Host *。
+    # 生成順は extraOptionOverrides -> Include -> settings（"*" 以外, topoSort 順）-> "*"。
+    # "*" は topoSort から除外され常に末尾に出力される（dag helper 不要）。
     # OrbStack の Include は「ファイル先頭」でなければ効かないが、この順序により構造的に保証される。
     includes = cfg.includes or [ ];
 
-    matchBlocks = (cfg.matchBlocks or { }) // {
-      # Host * は最後に出力される。ssh_config は先に読まれた値が勝つので、
+    settings = (cfg.settings or { }) // {
+      # "*" は常に最後に出力される。ssh_config は先に読まれた値が勝つので、
       # 個別ホストの設定がここより優先される。
       "*" = {
-        addKeysToAgent = "yes";
-        serverAliveInterval = 15;
-        serverAliveCountMax = 30;
-        # UseKeychain に対応するオプションは home-manager に存在しない
-        extraOptions = {
-          UseKeychain = "yes";
-        };
+        AddKeysToAgent = "yes";
+        ServerAliveInterval = 15;
+        ServerAliveCountMax = 30;
+        # settings は freeform なので UseKeychain もそのまま書ける（旧 extraOptions 不要）
+        UseKeychain = "yes";
       };
     };
   };
