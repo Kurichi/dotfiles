@@ -6,7 +6,10 @@ local keymap = vim.keymap.set
 -- <Leader> を <Space> にする
 keymap("", "<Space>", "<Nop>", opts)
 vim.g.mapleader = " "
-vim.g.maplocalleader = " "
+-- <LocalLeader> は "," にする。<Leader> と同じだと octo.nvim のバッファローカルマップ
+-- (<localleader>ca, <localleader>vd, <localleader>e, <localleader>b ...) が
+-- <leader>ca (claudecode) / <leader>vd (review.nvim) / <leader>e / <leader>b と衝突する
+vim.g.maplocalleader = ","
 
 -- Normal --
 keymap("n", "x", '"_x', opts)

@@ -28,6 +28,7 @@ return {
         integrations = {
           gitsigns = true,
           nvimtree = true,
+          octo = true,
         },
       })
 
