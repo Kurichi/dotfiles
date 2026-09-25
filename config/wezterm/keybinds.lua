@@ -36,13 +36,27 @@ local function equalize_panes(window, tab)
   end
 end
 
+-- 新規ペイン/タブの起点 cwd を決める。
+-- シェルが OSC 7 で報告する cwd ではなく、前面プロセスの実 cwd を優先する。
+-- `claude --worktree` のように子プロセスが chdir しても OSC 7 はシェルの cwd の
+-- ままなので、そのまま継承すると main ルートで開いてしまう。
+local function resolve_cwd(pane)
+  local info = pane:get_foreground_process_info()
+  if info and info.cwd and info.cwd ~= "" then
+    return info.cwd
+  end
+  -- 取得できない場合（mux/ssh ドメイン、権限不足等）は従来通り OSC 7 にフォールバック
+  local url = pane:get_current_working_dir()
+  return url and url.file_path or nil
+end
+
 -- 均等分割: 分割後にペインを均等化する
 local function smart_split(direction)
   return wezterm.action_callback(function(window, pane)
     local tab = pane:tab()
 
-    -- 分割
-    pane:split({ direction = direction })
+    -- 分割（cwd は前面プロセスの実 cwd を引き継ぐ）
+    pane:split({ direction = direction, cwd = resolve_cwd(pane) })
 
     -- 均等化
     equalize_panes(window, tab)
@@ -88,7 +102,14 @@ local keys = {
   { key = "w", mods = "SUPER", action = act.CloseCurrentPane({ confirm = true }) },
 
   -- タブ
-  { key = "t", mods = "SUPER", action = act.SpawnTab("CurrentPaneDomain") },
+  -- 新規タブも前面プロセスの実 cwd で開く（domain 既定は CurrentPaneDomain）
+  {
+    key = "t",
+    mods = "SUPER",
+    action = wezterm.action_callback(function(window, pane)
+      window:perform_action(act.SpawnCommandInNewTab({ cwd = resolve_cwd(pane) }), pane)
+    end),
+  },
   { key = "h", mods = "SUPER", action = act.ActivateTabRelative(-1) },
   { key = "l", mods = "SUPER", action = act.ActivateTabRelative(1) },
 
