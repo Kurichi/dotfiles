@@ -48,6 +48,7 @@ nix/
 │           ├── fish.nix      # Fish shell設定
 │           ├── fzf.nix       # fzf設定
 │           ├── direnv.nix    # direnv設定
+│           ├── zoxide.nix    # zoxide設定（z コマンド）
 │           ├── neovim.nix    # Neovim設定（config/nvimをリンク）
 │           ├── vscode.nix    # VSCode拡張機能・設定
 │           ├── wezterm.nix   # WezTerm設定（config/weztermをリンク）
