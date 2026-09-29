@@ -34,6 +34,7 @@ keymap("n", "<Leader>b", "<C-o>", opts)
 if not vim.g.vscode then
   keymap("n", "<Leader>,", vim.lsp.buf.code_action, opts)
   keymap("n", "<Leader>r", vim.lsp.buf.rename, opts)
+  keymap("n", "<Leader>e", vim.diagnostic.open_float, opts)
 end
 
 -- Insert --
