@@ -12,9 +12,7 @@ config.font = wezterm.font_with_fallback({
 config.use_ime = true
 
 -- visual
-config.color_scheme = "SpaceGray Eighties Dull"
-config.window_background_opacity = 0.85     -- 不透明度
-config.macos_window_background_blur = 20    -- ぼかし
+config.color_scheme = "Catppuccin Mocha"
 config.window_decorations = "RESIZE"        -- ヘッダー非表示
 config.audible_bell = "Disabled"            -- toast通知と二重にならないようシステムビープを無効化
 config.hide_tab_bar_if_only_one_tab = false -- タブが1つの時も表示
@@ -24,12 +22,20 @@ config.window_frame = {
 }
 config.show_new_tab_button_in_tab_bar = false
 config.show_close_tab_button_in_tabs = false
+-- ANSI の白が前景色より暗い (#bac2de / #a6adc8) ため、ANSI テーマの Claude Code 等が
+-- 暗く見える。組み込みスキームの白だけ明るくして使う
+local mocha = wezterm.color.get_builtin_schemes()["Catppuccin Mocha"]
+mocha.ansi[8] = "#cdd6f4"
+mocha.brights[8] = "#ffffff"
+
 config.colors = {
-  background = "#2A2C3C", -- ペインの背景色（inactive_pane_hsb が効くようにする）
+  ansi = mocha.ansi,
+  brights = mocha.brights,
+  background = "#1e1e2e", -- ペインの背景色（inactive_pane_hsb が効くようにする）
   tab_bar = {
     inactive_tab_edge = "none",
   },
-  split = "#BABBF1", -- ペイン境界線を目立たせる
+  split = "#b4befe", -- ペイン境界線を目立たせる
 }
 
 -- 非アクティブペインを暗くしてアクティブペインを目立たせる
@@ -39,12 +45,12 @@ config.inactive_pane_hsb = {
   brightness = 0.5, -- 暗くする
 }
 wezterm.on("format-tab-title", function(tab, tabs, panes, config, hover, max_width)
-  local background = "#5c6d74"
-  local foreground = "#FFFFFF"
+  local background = "#45475a"
+  local foreground = "#cdd6f4"
 
   if tab.is_active then
-    background = "#BABBF1"
-    foreground = "#000000"
+    background = "#b4befe"
+    foreground = "#11111b"
   end
 
   local title = "   " .. wezterm.truncate_right(tab.active_pane.title, max_width - 1) .. "   "

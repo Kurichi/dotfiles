@@ -24,7 +24,7 @@ return {
     priority = 1000,
     config = function()
       require("catppuccin").setup({
-        transparent_background = true,
+        flavour = "mocha",
         integrations = {
           gitsigns = true,
           nvimtree = true,
@@ -32,16 +32,15 @@ return {
         },
       })
 
-      vim.cmd("colorscheme catppuccin-frappe")
+      vim.cmd("colorscheme catppuccin-mocha")
 
-      -- 補完メニューは transparent_background の対象から外す。
-      -- 透けると本文と重なって読めないため、背景を明示的に塗る
+      -- 補完メニューは本文と区別できるよう、mantle/surface1 で背景を明示的に塗る
       local function completion_hl()
         local ok, palettes = pcall(require, "catppuccin.palettes")
         if not ok then
           return
         end
-        local c = palettes.get_palette("frappe")
+        local c = palettes.get_palette("mocha")
         local hl = vim.api.nvim_set_hl
         hl(0, "Pmenu", { fg = c.text, bg = c.mantle })
         hl(0, "PmenuSel", { fg = c.text, bg = c.surface1, bold = true })
