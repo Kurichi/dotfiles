@@ -50,6 +50,7 @@
     shellAbbrs = {
       gp = "git push origin HEAD";
       gs = "git switch";
+      gw = "git wt";
       gdb = "git branch --merged | grep -v \"*\" | grep -v main | xargs git branch -d";
       repo = "gh repo view --web";
       kube = "kubectl";
@@ -57,7 +58,7 @@
       # nix
       rebuild = "darwin-rebuild switch --flake ~/repos/github.com/Kurichi/dotfiles#${profile.profileName}";
       # claude
-      c = "claude --worktree";
+      c = "claude --model opusplan --worktree";
     };
     functions = {
       fish_prompt = ''
