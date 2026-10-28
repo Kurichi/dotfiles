@@ -20,7 +20,7 @@
     pnpm
     bun
     uv
-    go_1_26
+    go_1_27
     rustup
 
     # Git tools
