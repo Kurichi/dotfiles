@@ -58,7 +58,8 @@
       # nix
       rebuild = "darwin-rebuild switch --flake ~/repos/github.com/Kurichi/dotfiles#${profile.profileName}";
       # claude
-      c = "claude --model opusplan --worktree";
+      c = "claude --model opus --worktree";
+      cl = "claude --model opus";
     };
     functions = {
       fish_prompt = ''
