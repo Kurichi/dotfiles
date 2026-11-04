@@ -19,9 +19,9 @@ let
         "mcp__gopls__*" "mcp__deepwiki__*" "WebSearch"
       ];
       deny = [ "Bash(git reset --hard:*)" ];
-      defaultMode = "plan";
+      defaultMode = "auto";
     };
-    model = "opusplan";
+    model = "opus";
     reasoningEffort = "medium";
     hooks = {
       PreToolUse = [{ matcher = "Bash"; hooks = [{ type = "command"; command = "$HOME/.config/claude/hooks/guard-worktree.sh"; }]; }];
