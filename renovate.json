@@ -3,25 +3,45 @@
   "extends": [
     "config:recommended",
     ":dependencyDashboard",
-    ":semanticCommitsDisabled"
+    ":semanticCommitsDisabled",
+    "helpers:pinGitHubActionDigests"
   ],
   "timezone": "Asia/Tokyo",
   "schedule": ["before 9am on monday"],
   "updateNotScheduled": false,
   "prHourlyLimit": 0,
   "prConcurrentLimit": 5,
-  "labels": ["dependencies", "nix"],
-  "commitMessagePrefix": "chore(nix):",
+  "labels": ["dependencies"],
   "commitMessageAction": "bump",
   "commitMessageTopic": "{{depName}}",
   "commitMessageExtra": "to {{newValue}}",
   "commitMessageSuffix": "[skip-review]",
+  "automerge": true,
+  "platformAutomerge": false,
   "nix": {
     "enabled": true
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 9am on monday"],
+    "commitMessageAction": "update",
+    "commitMessageTopic": "flake.lock",
+    "commitMessageExtra": null
   },
   "packageRules": [
     {
       "matchManagers": ["nix"],
+      "addLabels": ["nix"],
+      "commitMessagePrefix": "chore(nix):"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "addLabels": ["ci"],
+      "commitMessagePrefix": "chore(ci):",
+      "minimumReleaseAge": "3 days"
+    },
+    {
+      "matchUpdateTypes": ["major"],
       "automerge": false
     }
   ],
