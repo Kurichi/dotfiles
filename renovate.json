@@ -17,7 +17,6 @@
   "commitMessageExtra": "to {{newValue}}",
   "commitMessageSuffix": "[skip-review]",
   "automerge": true,
-  "platformAutomerge": false,
   "nix": {
     "enabled": true
   },
