@@ -82,7 +82,8 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           git worktree add "$RUNNER_TEMP/base" "$BASE_SHA"
-          majors=$(.github/scripts/package-diff.sh "$RUNNER_TEMP/base" . "$RUNNER_TEMP/diff.md")
+          majors=$(nix shell --inputs-from . nixpkgs#go_1_27 --command \
+            go -C .github/package-diff run . "$RUNNER_TEMP/base" "$GITHUB_WORKSPACE" "$RUNNER_TEMP/diff.md")
           echo "majors=$majors" >> "$GITHUB_OUTPUT"
           cat "$RUNNER_TEMP/diff.md" >> "$GITHUB_STEP_SUMMARY"
 
