@@ -32,6 +32,7 @@
     claudeCodePkg
     llmPkgs.gemini-cli
     llmPkgs.copilot-cli
+    llmPkgs.antigravity-cli # agy
     moreutils
 
     # Linters
