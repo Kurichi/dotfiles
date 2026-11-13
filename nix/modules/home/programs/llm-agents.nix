@@ -22,7 +22,7 @@ let
       defaultMode = "auto";
     };
     model = "opus";
-    reasoningEffort = "medium";
+    effortLevel = "xhigh";
     hooks = {
       PreToolUse = [{ matcher = "Bash"; hooks = [{ type = "command"; command = "$HOME/.config/claude/hooks/guard-worktree.sh"; }]; }];
       Notification = [{ hooks = [{ type = "command"; command = "$HOME/.config/claude/hooks/notify.sh"; }]; }];
