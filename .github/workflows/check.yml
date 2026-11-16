@@ -2,10 +2,16 @@ name: flake check
 
 # check は ruleset の必須チェックなので、全 PR で必ず報告されるよう paths フィルタは使わない。
 # nix に関係しない PR では check を skip する（skip は必須チェック上 success 扱い）。
+# allow-major ラベルの付け外しで check を再評価するため labeled / unlabeled も拾う。
 on:
   pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
   push:
     branches: [main]
+
+concurrency:
+  group: check-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -17,6 +23,7 @@ jobs:
       pull-requests: read
     outputs:
       nix: ${{ steps.filter.outputs.nix }}
+      lock: ${{ steps.filter.outputs.lock }}
     steps:
       - id: filter
         env:
@@ -26,21 +33,32 @@ jobs:
         run: |
           if [ "$EVENT_NAME" != "pull_request" ]; then
             echo "nix=true" >> "$GITHUB_OUTPUT"
+            echo "lock=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           files=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" --jq '.[].filename')
-          if printf '%s\n' "$files" | grep -qE '^(flake\.nix|flake\.lock|nix/|renovate\.json|\.github/workflows/)'; then
+          if printf '%s\n' "$files" | grep -qE '^(flake\.nix|flake\.lock|nix/|renovate\.json|\.github/)'; then
             echo "nix=true" >> "$GITHUB_OUTPUT"
           else
             echo "nix=false" >> "$GITHUB_OUTPUT"
+          fi
+          if printf '%s\n' "$files" | grep -qx 'flake\.lock'; then
+            echo "lock=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "lock=false" >> "$GITHUB_OUTPUT"
           fi
 
   check:
     needs: changes
     if: needs.changes.outputs.nix == 'true'
     runs-on: macos-26
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
 
       - uses: DeterminateSystems/nix-installer-action@3138316df39ed29be04236d7ffc686fa525866aa # v23
         with:
@@ -56,3 +74,37 @@ jobs:
         run: |
           nix eval .#darwinConfigurations.personal.system.outPath --raw
           nix eval .#darwinConfigurations.work.system.outPath --raw
+
+      - name: Package version diff
+        id: diff
+        if: needs.changes.outputs.lock == 'true'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git worktree add "$RUNNER_TEMP/base" "$BASE_SHA"
+          majors=$(nix shell --inputs-from . nixpkgs#go_1_27 --command \
+            go -C .github/package-diff run . "$RUNNER_TEMP/base" "$GITHUB_WORKSPACE" "$RUNNER_TEMP/diff.md")
+          echo "majors=$majors" >> "$GITHUB_OUTPUT"
+          cat "$RUNNER_TEMP/diff.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comment package version diff
+        if: steps.diff.outcome == 'success' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          comment_id=$(gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- package-version-diff -->"))) | .id' | head -n1)
+          if [ -n "$comment_id" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" -F "body=@$RUNNER_TEMP/diff.md" > /dev/null
+          else
+            gh api -X POST "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" -F "body=@$RUNNER_TEMP/diff.md" > /dev/null
+          fi
+
+      - name: Block major updates without allow-major
+        if: steps.diff.outputs.majors != '' && steps.diff.outputs.majors != '0' && !contains(github.event.pull_request.labels.*.name, 'allow-major')
+        env:
+          MAJORS: ${{ steps.diff.outputs.majors }}
+        run: |
+          echo "::error::メジャーアップデートが ${MAJORS} 件あります。確認後 allow-major ラベルを付けてください。"
+          exit 1
