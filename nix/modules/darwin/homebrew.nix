@@ -10,9 +10,11 @@
     caskArgs.appdir = "/Applications";
     # CLI ツールは nix で管理し、Homebrew は nixpkgs にない GUI アプリ（cask）だけにする
     casks = [
-      "1password"
+      "chatgpt"
+      "claude"
       "homerow"
       "proton-pass"
+      "raycast"
       "wezterm@nightly"
     ] ++ (profile.homebrew.casks or []);
     masApps = profile.homebrew.masApps or {};

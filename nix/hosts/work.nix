@@ -15,7 +15,6 @@
   homebrew = {
     casks = [
       "alt-tab"
-      "datagrip"
       "notion-calendar"
       "rancher"
       "slack"
