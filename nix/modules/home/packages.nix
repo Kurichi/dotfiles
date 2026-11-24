@@ -16,6 +16,7 @@
     tmux
     bitwarden-cli # bw
     gws # Google Workspace CLI
+    k1low-mo # mo: Markdown ビューア。nix/overlays/pkgs で定義
 
     # Development
     nodejs
