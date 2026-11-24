@@ -33,7 +33,16 @@ let
       "Notion"
       "bugmap"
       "monday.com"
+    ] ++ [
+      # Datadog は v1 (https://mcp.datadoghq.com/v1/mcp) を残し、unstable 版を止める。
+      # 同名コネクタは "claude.ai Datadog (2)" のように連番になり番号が変わりうるため URL で指定する
+      { serverUrl = "https://mcp.datadoghq.com/api/unstable/*"; }
     ];
+    sandbox = {
+      # codex plugin の companion はサンドボックス内だと ~/.config/claude/plugins/data に
+      # ジョブ用ディレクトリを作れず EPERM で止まるため、最初からサンドボックス外で実行する
+      excludedCommands = [ "node */openai-codex/codex/*/scripts/codex-companion.mjs*" ];
+    };
     model = "opus";
     effortLevel = "xhigh";
     hooks = {
