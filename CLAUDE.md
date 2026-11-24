@@ -54,7 +54,8 @@ nix/
 │           ├── wezterm.nix   # WezTerm設定（config/weztermをリンク）
 │           └── llm-agents.nix # Claude Code/Gemini CLI設定
 └── overlays/
-    └── default.nix           # overlay集約（現在 no-op）
+    ├── default.nix           # overlay集約（ワークアラウンド + カスタムパッケージ登録）
+    └── pkgs/                 # nixpkgs 未収録パッケージ（k1low-mo）
 ```
 
 ### アプリケーション設定の構造

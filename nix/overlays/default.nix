@@ -1,4 +1,7 @@
-_final: prev: {
+final: prev: {
+  # nixpkgs 未収録のパッケージ
+  k1low-mo = final.callPackage ./pkgs/k1low-mo.nix { };
+
   pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
     (_pyFinal: pyPrev:
       prev.lib.optionalAttrs (pyPrev ? python-lsp-server) {
