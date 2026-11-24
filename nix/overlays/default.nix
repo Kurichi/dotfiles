@@ -1,8 +1,4 @@
-final: prev: {
-  # nixpkgs 未収録のパッケージ
-  datadog-pup = final.callPackage ./pkgs/datadog-pup.nix { };
-  displayplacer = final.callPackage ./pkgs/displayplacer.nix { };
-
+_final: prev: {
   pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
     (_pyFinal: pyPrev:
       prev.lib.optionalAttrs (pyPrev ? python-lsp-server) {

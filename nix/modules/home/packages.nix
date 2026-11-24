@@ -48,10 +48,6 @@
     awscli2
     ssm-session-manager-plugin
     proton-pass-cli
-    datadog-pup # Datadog CLI (`pup`)。nix/overlays/pkgs で定義
-
-    # macOS utilities
-    displayplacer # nix/overlays/pkgs で定義
 
     # Build tools
     ninja
