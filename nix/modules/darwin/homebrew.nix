@@ -8,15 +8,7 @@
       cleanup = "none";
     };
     caskArgs.appdir = "/Applications";
-    taps = [
-      "datadog-labs/pack"
-      "jakehilborn/jakehilborn"
-    ];
-    brews = [
-      "mise"
-      "datadog-labs/pack/pup"
-      "jakehilborn/jakehilborn/displayplacer"
-    ];
+    # CLI ツールは nix で管理し、Homebrew は nixpkgs にない GUI アプリ（cask）だけにする
     casks = [
       "1password"
       "homerow"

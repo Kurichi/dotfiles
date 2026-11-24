@@ -22,6 +22,8 @@
     uv
     go_1_27
     rustup
+    mise
+    usage # mise の補完スクリプトが実行時に呼び出す
 
     # Git tools
     gh
@@ -46,6 +48,10 @@
     awscli2
     ssm-session-manager-plugin
     proton-pass-cli
+    datadog-pup # Datadog CLI (`pup`)。nix/overlays/pkgs で定義
+
+    # macOS utilities
+    displayplacer # nix/overlays/pkgs で定義
 
     # Build tools
     ninja

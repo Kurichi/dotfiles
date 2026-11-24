@@ -54,7 +54,8 @@ nix/
 │           ├── wezterm.nix   # WezTerm設定（config/weztermをリンク）
 │           └── llm-agents.nix # Claude Code/Gemini CLI設定
 └── overlays/
-    └── default.nix           # overlay集約（現在 no-op）
+    ├── default.nix           # overlay集約（ワークアラウンド + カスタムパッケージ登録）
+    └── pkgs/                 # nixpkgs 未収録パッケージ（datadog-pup, displayplacer）
 ```
 
 ### アプリケーション設定の構造
@@ -82,7 +83,7 @@ config/
 
 1. **nixpkgs**: 大部分のCLIツール（`nix/modules/home/packages.nix`で定義）
 2. **overlays**: カスタムパッケージ（`nix/overlays/`で定義）
-3. **Homebrew casks**: Nixで提供されていないGUIアプリ（`nix/modules/darwin/homebrew.nix`）
+3. **Homebrew casks**: Nixで提供されていないGUIアプリ（`nix/modules/darwin/homebrew.nix`）。CLI ツール（brews）は置かず、nixpkgs にないものは overlays で定義する
 4. **Mac App Store**: masAppsで管理（`nix/modules/darwin/homebrew.nix`）
 5. **llm-agents flake**: Claude Code等のAIツール
 
