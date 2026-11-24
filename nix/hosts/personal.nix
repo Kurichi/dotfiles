@@ -44,7 +44,6 @@
     casks = [
       "adobe-acrobat-reader"
       "alt-tab"
-      "claude"
       "discord"
       "google-chrome"
       "google-drive"
