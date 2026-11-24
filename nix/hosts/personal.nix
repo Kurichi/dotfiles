@@ -45,7 +45,6 @@
       "adobe-acrobat-reader"
       "alt-tab"
       "claude"
-      "codex"
       "discord"
       "google-chrome"
       "google-drive"

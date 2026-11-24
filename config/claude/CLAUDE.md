@@ -8,7 +8,7 @@
 - プロジェクト参加者全員が使用するツールの取得時は `go install` ではなく `go get -tool` を使用してください。
 - tool を使用したい時は `go tool tool-name` で使用してください。
 - ソースコードの取得は不要な一度限りのコマンドは `go run github.com/xxx/yyy/cmd/yyy` で実行してください。
-- gopls MCP Server を使用して LSP を参照してください。
+- コードの定義・参照・型情報の確認には、gopls-lsp plugin 経由の LSP ツール（goToDefinition / findReferences / hover など）を使用してください。
 
 ## 使用するコマンド・ツール
 
