@@ -10,11 +10,13 @@
   nix.enable = false;
 
   # Determinate Nix の /etc/nix/nix.conf は `!include nix.custom.conf` で
-  # 追加設定を読み込む。cachix substituter を trusted に登録する。
+  # 追加設定を読み込む。input が推奨するバイナリキャッシュを trusted に登録する。
+  # - ryoppippi.cachix.org: claude-code-overlay
+  # - cache.numtide.com: llm-agents（codex 等。鍵は llm-agents の flake.nix の nixConfig と同じ）
   environment.etc."nix/nix.custom.conf".text = ''
-    extra-substituters = https://ryoppippi.cachix.org
-    extra-trusted-substituters = https://ryoppippi.cachix.org
-    extra-trusted-public-keys = ryoppippi.cachix.org-1:b2LbtWNvJeL/qb1B6TYOMK+apaCps4SCbzlPRfSQIms=
+    extra-substituters = https://ryoppippi.cachix.org https://cache.numtide.com
+    extra-trusted-substituters = https://ryoppippi.cachix.org https://cache.numtide.com
+    extra-trusted-public-keys = ryoppippi.cachix.org-1:b2LbtWNvJeL/qb1B6TYOMK+apaCps4SCbzlPRfSQIms= niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g=
     !include /etc/nix/access-tokens.conf
   '';
 

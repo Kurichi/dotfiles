@@ -14,10 +14,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    llm-agents = {
-      url = "github:numtide/llm-agents.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # nixpkgs は follows しない: 上流 CI と同じ nixpkgs で評価させ、
+    # cache.numtide.com のビルド済みバイナリ（Rust 製の codex 等）を取得できるようにする
+    llm-agents.url = "github:numtide/llm-agents.nix";
 
     claude-code-overlay = {
       url = "github:ryoppippi/claude-code-overlay";
