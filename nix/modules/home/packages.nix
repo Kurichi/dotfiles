@@ -14,6 +14,8 @@
     just
     tree
     tmux
+    bitwarden-cli # bw
+    gws # Google Workspace CLI
 
     # Development
     nodejs
