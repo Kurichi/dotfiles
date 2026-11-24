@@ -16,11 +16,24 @@ let
     permissions = {
       allow = [
         "Bash(fd:*)" "Bash(rg:*)" "Bash(eza:*)"
-        "mcp__gopls__*" "mcp__deepwiki__*" "WebSearch"
+        "WebSearch"
       ];
       deny = [ "Bash(git reset --hard:*)" ];
       defaultMode = "auto";
     };
+    # 使わない claude.ai コネクタを無効化（名前は "claude.ai <display_name>" で verbatim 比較）
+    deniedMcpServers = map (name: { serverName = "claude.ai ${name}"; }) [
+      "Asana"
+      "Atlassian"
+      "Box"
+      "Canva"
+      "HubSpot"
+      "Intercom"
+      "Microsoft 365"
+      "Notion"
+      "bugmap"
+      "monday.com"
+    ];
     model = "opus";
     effortLevel = "xhigh";
     hooks = {
