@@ -82,7 +82,7 @@ config/
 
 1. **nixpkgs**: 大部分のCLIツール（`nix/modules/home/packages.nix`で定義）
 2. **overlays**: カスタムパッケージ（`nix/overlays/`で定義）
-3. **Homebrew casks**: Nixで提供されていないGUIアプリ（`nix/modules/darwin/homebrew.nix`）
+3. **Homebrew casks**: Nixで提供されていないGUIアプリ（`nix/modules/darwin/homebrew.nix`）。CLI ツール（brews）は置かない
 4. **Mac App Store**: masAppsで管理（`nix/modules/darwin/homebrew.nix`）
 5. **llm-agents flake**: Claude Code等のAIツール
 

@@ -24,6 +24,8 @@
     uv
     go_1_27
     rustup
+    mise
+    usage # mise の補完スクリプトが実行時に呼び出す
 
     # Git tools
     gh
