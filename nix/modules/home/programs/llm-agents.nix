@@ -12,6 +12,9 @@ let
       # 0/負数は即時発火する既知のバグがあるため int32 最大値を指定
       CLAUDE_AFK_TIMEOUT_MS = "2147483647";
       CLAUDE_AFK_COUNTDOWN_MS = "2147483647";
+      # work の managed policy が DISABLE_TELEMETRY=1 を設定しており feature flag
+      # (tengu_sage_compass2) を受信できず /advisor が無効化されるため、明示的に有効化する
+      CLAUDE_CODE_ENABLE_EXPERIMENTAL_ADVISOR_TOOL = "1";
     };
     permissions = {
       allow = [
